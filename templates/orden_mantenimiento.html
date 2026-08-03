@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>KERUI DIGITAL FORMS</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/estilos.css') }}">
+
+</head>
+
+<body>
+
+    <div class="hoja">
+
+        <!-- ========================================= -->
+        <!-- ENCABEZADO -->
+        <!-- ========================================= -->
+
+        <div class="encabezado">
+
+            <!-- LOGO -->
+
+            <div class="logo">
+
+                <img
+                    src="{{ url_for('static', filename='img/logo_kerui.png') }}"
+                    alt="KERUI">
+
+            </div>
+
+            <!-- TÍTULO -->
+
+            <div class="titulo">
+
+                ORDEN DE MANTENIMIENTO
+
+            </div>
+
+            <!-- DATOS DEL DOCUMENTO -->
+
+            <div class="datos">
+
+                <div class="celda">
+                    <strong>Código</strong>
+                </div>
+
+                <div class="celda">
+                    K5-F-05
+                </div>
+
+                <div class="celda">
+                    <strong>Fecha</strong>
+                </div>
+
+                <div class="celda">
+                    10/11/2021
+                </div>
+
+                <div class="celda">
+                    <strong>Versión</strong>
+                </div>
+
+                <div class="celda">
+                    3
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================= -->
+        <!-- SECCIÓN 1 -->
+        <!-- ========================================= -->
+
+        <div class="seccion">
+
+            1. INFORMACIÓN GENERAL
+
+    </div>
+
+    <table class="tabla-info">
+
+    <tr>
+
+        <td rowspan="2" class="gris etiqueta">
+            Descripción de la Orden De Trabajo:
+        </td>
+
+        <td rowspan="2" class="col-descripcion">
+            <textarea></textarea>
+        </td>
+
+        <td class="gris etiqueta">
+            Nº de Orden de Trabajo:
+        </td>
+
+        <td class="col-orden">
+            <input type="text" class="campo">
+            
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td class="gris etiqueta">
+            Tipo De Orden De Trabajo:
+        </td>
+        
+        <td class="col-prioridad">
+
+                <select class="campo">
+
+                    <option></option>
+                    <option>PREVENTIVO</option>
+                    <option>PREDICTIVO</option>
+                    <option>CORRECTIVO</option>
+                    <option>MODIFICACIÓN</option>
+                    <option>OTROS...</option>
+
+                </select>
+
+            </td>
+
+        <td>
+            <input type="text">
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td rowspan="3" class="gris etiqueta centro">
+            Operación
+        </td>
+
+        <td>
+            <input type="text">
+        </td>
+
+        <td class="gris etiqueta centro">
+            Frecuencia
+        </td>
+        
+        <td class="col-prioridad">
+
+                <select class="campo">
+
+                    <option></option>
+                    <option>100HR</option>
+                    <option>300HR</option>
+                    <option>400HR</option>
+                    <option>1000HR</option>
+                    <option>1500HR</option>
+                    <option>2000HR</option>
+                    <option>3000HR</option>
+                    <option>4000HR</option>
+                    <option>8000HR</option>
+                    <option>12000HR</option>
+                    <option>OVERHAUL</option>
+
+
+
+                    .....
+                </select>
+
+            </td>
+
+        <td>
+            <input type="text">
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td>
+            <input type="text">
+        </td>
+
+        <td class="gris etiqueta centro">
+            Frecuencia
+        </td>
+        
+        <td class="col-prioridad">
+
+                <select class="campo">
+
+                    <option></option>
+                    <option>100HR</option>
+                    <option>300HR</option>
+                    <option>400HR</option>
+                    <option>1000HR</option>
+                    <option>1500HR</option>
+                    <option>2000HR</option>
+                    <option>3000HR</option>
+                    <option>4000HR</option>
+                    <option>8000HR</option>
+                    <option>12000HR</option>
+                    <option>OVERHAUL</option>
+
+                </select>
+
+            </td>
+
+        <td>
+            <input type="text">
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td>
+            <input type="text">
+        </td>
+
+        <td class="gris etiqueta centro">
+            Frecuencia
+        </td>
+        
+        <td class="col-prioridad">
+
+                <select class="campo">
+
+                    <option></option>
+                    <option>100HR</option>
+                    <option>300HR</option>
+                    <option>400HR</option>
+                    <option>1000HR</option>
+                    <option>1500HR</option>
+                    <option>2000HR</option>
+                    <option>3000HR</option>
+                    <option>4000HR</option>
+                    <option>8000HR</option>
+                    <option>12000HR</option>
+                    <option>OVERHAUL</option>
+
+                </select>
+
+            </td>
+
+        <td>
+            <input type="text">
+        </td>
+
+    </tr>
+
+</table>
+
+     <div class="recomendaciones">
+
+    <strong>
+        ANTES DE INICIAR CUALQUIER LABOR TENER EN CUENTA LAS SIGUIENTES RECOMENDACIONES:
+    </strong>
+
+    <ul>
+
+        <li>
+            DILIGENCIAR DEBIDAMENTE LOS PERMISOS DE TRABAJO JUNTO CON SU ATS PARA LA ACTIVIDAD A EJECUTAR.
+        </li>
+
+        <li>
+            PERMISO DE TRABAJO #
+
+            <input
+                type="text"
+                class="permiso"
+                placeholder="Número del permiso">
+        </li>
+
+        <li>
+            UTILICE LOS ELEMENTOS DE PROTECCIÓN PERSONAL NECESARIOS DE ACUERDO A ESTA ACTIVIDAD,
+            GUANTES, CASCO, BOTAS, GAFAS, OVEROL.
+        </li>
+
+        <li>
+            ANTES DE EJECUTAR CUALQUIER ACTIVIDAD EN EL EQUIPO ASEGÚRESE DE BLOQUEAR Y ETIQUETAR EL MISMO,
+            ASÍ COMO DESENERGIZAR.
+        </li>
+
+        <li>
+            CUALQUIER FUENTE DE PODER, SEA MECÁNICA, ELÉCTRICA, HIDRÁULICA O NEUMÁTICA.
+        </li>
+
+    </ul>
+
+</div>
+    <!-- ========================================= -->
+    <!-- DATOS DEL TRABAJO -->
+    <!-- ========================================= -->
+
+    <table class="tabla-datos">
+
+        <tr>
+
+            <td class="titulo-celda">
+                Fecha Inicio:
+            </td>
+
+            <td class="col-fecha">
+                <input type="date" class="campo">
+            </td>
+
+            <td class="titulo-celda">
+                Hora Inicio:
+            </td>
+
+             <td class="col-hora">
+                <input type="time" class="campo">
+            </td>
+
+            <td class="titulo-celda">
+                Horómetro:
+            </td>
+
+            <td class="col-horometro">
+                <input type="text" class="campo">
+            </td>
+
+            <td class="titulo-celda">
+                Prioridad:
+            </td>
+
+            <td class="col-prioridad">
+
+                <select class="campo">
+
+                    <option></option>
+                    <option>ALTA</option>
+                    <option>MEDIA</option>
+                    <option>BAJA</option>
+
+                </select>
+
+            </td>
+
+        </tr>
+        </tr>
+            <td class="titulo-celda">
+                Fecha de finalizacion:
+            </td>
+
+            <td class="col-fecha">
+                <input type="date" class="campo">
+            </td>
+
+            <td class="titulo-celda">
+                Hora final:
+            </td>
+
+             <td class="col-hora">
+                <input type="time" class="campo">
+            </td>
+
+            <td class="titulo-celda">
+                especialidad:
+            </td>
+            <td colspan="3" class="col-especialidad">
+
+                <select class="campo">
+
+                    <option>ELECTRICO</option>
+                    <option>INSTRUMENTACIÓN</option>
+                    <option>MÉCANICO</option>
+
+                </select>
+
+            </td>
+
+        </tr>
+        <!-- ========================================= -->
+<!-- UBICACIÓN DEL EQUIPO -->
+<!-- ========================================= -->
+
+<table class="tabla-equipo">
+
+    <!-- FILA DE TÍTULOS -->
+
+    <tr>
+
+        <td class="titulo-equipo">
+            Ubicación Técnica
+        </td>
+
+        <td class="titulo-equipo">
+            Descripción del equipo
+        </td>
+
+        <td class="titulo-equipo">
+            Núm. Equipo SAP
+        </td>
+
+        <td class="titulo-equipo">
+            Número Serie
+        </td>
+
+    </tr>
+
+    <!-- FILA DE CAMPOS -->
+
+    <tr>
+
+        <td class="col-ubicacion">
+
+            <select class="campo">
+
+                <option value=""></option>
+
+                <option>900-6 G</option>
+                <option>900-6 C</option>
+                <option>900-8 G</option>
+                <option>900-8 C</option>
+                <option>900-12 G</option>
+                <option>900-12 C</option>
+                <option>900-13 G</option>
+                <option>900-13 C</option>
+                <option>1200-7 G</option>
+                <option>1200-7 C</option>
+                <option>1200-9 G</option>
+                <option>1200-9 C</option>
+                <option>1200-3 G</option>
+                <option>1200-3 C</option>
+                <option>1200-3 T</option>
+                <option>N/A</option>
+
+            </select>
+
+        </td>
+
+        <td class="col-equipo">
+
+            <input type="text" class="campo">
+
+        </td>
+
+        <td class="col-sap">
+
+
+            <select class="campo">
+
+                <option value=""></option>
+                <option>YF 026</option>
+                <option>900-6 C</option>
+                <option>900-8 G</option>
+                <option>900-8 C</option>
+                <option>900-12 G</option>
+                <option>900-12 C</option>
+                <option>900-13 G</option>
+                <option>900-13 C</option>
+                <option>1200-7 G</option>
+                <option>1200-7 C</option>
+                <option>1200-9 G</option>
+                <option>1200-9 C</option>
+                <option>1200-3 G</option>
+                <option>1200-3 C</option>
+                <option>1200-3 T</option>
+                <option>N/A</option>
+
+               
+            </select>
+
+                
+        </td>
+
+        <td class="col-serie">
+
+            <select class="campo">
+
+                <option value=""></option>
+                <option>S 46212</option>
+                <option>S 46211</option>
+                <option>ISW 482</option>
+                <option>ISW 480</option>
+                <option>WCT 966</option>
+                <option>WCT 965</option>
+                <option>900-13 G</option>
+                <option>900-13 C</option>
+                <option>1200-7 G</option>
+                <option>1200-7 C</option>
+                <option>1200-9 G</option>
+                <option>1200-9 C</option>
+                <option>1200-3 G</option>
+                <option>1200-3 C</option>
+                <option>1200-3 T</option>
+                <option>N/A</option>
+
+               
+            </select>
+
+        </td>
+
+    </tr>
+
+</table>
+        <!-- ========================================= -->
+        <!-- SECCIÓN 2 -->
+        <!-- ========================================= -->
+
+         <div class="seccion">
+
+            2. REPORTE TÉCNICO
+
+        </div>
+    
+    <!-- ========================================= -->
+<!-- ACTIVIDAD REALIZADA -->
+<!-- ========================================= -->
+
+<table class="tabla-reporte">
+
+    <tr>
+
+        <td class="titulo-reporte">
+
+            ¿Qué actividad realizó al equipo?
+
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td>
+
+            <textarea class="reporte-corto"></textarea>
+
+        </td>
+
+    </tr>
+
+</table>    
+
+     <table class="tabla-reporte">
+
+    <tr>
+
+        <td class="titulo-reporte">
+            ¿Cómo quedó el equipo?
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td>
+
+            <textarea class="reporte-tecnico"></textarea>
+
+        </td>
+
+    </tr>
+
+</table>
+    
+    <table class="tabla-reporte">
+
+    <tr>
+
+        <td class="titulo-reporte">
+            Recomendaciones y Pendientes
+        </td>
+
+    </tr>
+
+    <tr>
+
+        <td>
+
+            <textarea class="reporte-tecnico"></textarea>
+
+        </td>
+
+    </tr>
+    
+    </table>
+        <!-- ========================================= -->
+        <!-- SECCIÓN 3 -->
+        <!-- ========================================= -->
+
+         <div class="seccion">
+
+            3. INFORME DE FALLA
+
+        </div>
+       
+        <table class="tabla-falla">
+
+        <!-- FILA DE TÍTULOS -->
+
+        <tr>
+
+        <td class="titulo-falla col-falla">
+            Parte que falló (Modo de Falla)
+        </td>
+
+        <td class="titulo-falla col-causa">
+            Causa probable de falla
+        </td>
+
+        <td class="titulo-falla col-parada">
+            Parada
+        </td>
+
+        <td class="titulo-falla col-fuera">
+            Tiempo fuera de servicio
+        </td>
+
+        <td class="titulo-falla col-reparacion">
+            Tiempo de reparación
+        </td>
+    <tr>
+    
+    </tr>
+
+        <td class="col-falla">
+
+            <input type="text" class="campo">
+
+        </td>
+
+        <td class="col-causa">
+
+            <input type="text" class="campo">
+
+        </td>
+
+        <td class="col-parada parada">
+
+        <label>
+            <input type="radio" name="parada">
+            Sí
+        </label>
+
+        <label>
+            <input type="radio" name="parada">
+            No
+        </label>
+        
+        </td>
+
+
+        <td class="col-fuera">
+
+            <input type="text" class="campo">
+
+        </td>
+
+        <td class="col-reparacion">
+
+            <input type="text" class="campo">
+
+        </td>
+
+    </tr>
+</table>
+
+        <!-- ========================================= -->
+        <!-- SECCIÓN 4 -->
+        <!-- ========================================= -->
+
+         <div class="seccion">
+
+            4. REPUESTOS UTILIZADOS
+
+        </div>
+    
+    <table class="tabla-repuesto">
+
+        <!-- FILA DE TÍTULOS -->
+
+        <tr>
+
+        <td class="titulo-repuesto col-item">
+            Ítem
+        </td>
+
+        <td class="titulo-repuesto col-repuesto">
+            Descripción del repuesto
+        </td>
+
+        <td class="titulo-repuesto col-parte">
+            Parte Número
+        </td>
+
+        <td class="titulo-repuesto col-cantidad">
+            Cantidad
+        </td>
+
+    </tr>
+
+        <!-- PRIMERA FILA DE DATOS -->
+        <tr>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="number" class="campo"></td>
+    </tr>
+
+    <tr>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="number" class="campo"></td>
+    </tr>
+
+    <tr>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="number" class="campo"></td>
+    </tr>
+
+    <tr>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="number" class="campo"></td>
+    </tr>
+
+    <tr>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="text" class="campo"></td>
+        <td><input type="number" class="campo"></td>
+    </tr>
+
+    </table>
+
+
+    <!-- ========================================= -->
+    <!-- SECCIÓN 5 -->
+    <!-- ========================================= -->
+
+    <div class="seccion">
+
+        5. NOMBRES Y TIEMPOS DEL PERSONAL TÉCNICO QUE EJECUTA LA ACTIVIDAD
+
+    </div>
+
+    <table class="tabla-personal">
+
+        <tr>
+
+            <td class="titulo-personal col-nombre">
+                Nombre
+            </td>
+
+            <td class="titulo-personal col-apellido">
+                Apellidos
+            </td>
+
+            <td class="titulo-personal col-fecha-trabajo">
+                Fecha de Trabajo
+            </td>
+
+            <td class="titulo-personal col-horas">
+                Horas trabajadas
+            </td>
+
+            <td class="titulo-personal col-extras">
+                Horas Extras
+            </td>
+
+        </tr>
+
+        <tr>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="date" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+        </tr>
+
+        <tr>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="date" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+        </tr>
+
+        <tr>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="date" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+        </tr>
+
+        <tr>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="text" class="campo"></td>
+
+            <td><input type="date" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+            <td><input type="number" class="campo"></td>
+
+        </tr>
+     
+    </table>   
+
+    <!-- ========================================= -->
+    <!-- SECCIÓN 6 -->
+    <!-- ========================================= -->
+
+        <div class="seccion">
+
+            6. VALIDACIONES
+
+        </div>
+
+        <table class="tabla-validacion">
+
+        <!-- Espacio para las firmas -->
+
+    <tr>
+
+        <td class="firma"></td>
+
+        <td class="firma"></td>
+
+        <td class="firma"></td>
+
+    </tr>
+
+        <!-- Nombre -->
+
+    <tr>
+
+        <td class="titulo-validacion">
+            Nombre y/o Firma Técnico Ejecutante
+        </td>
+
+        <td class="titulo-validacion">
+            Nombre y/o Firma del Supervisor / Ing. Mtto
+        </td>
+
+        <td class="titulo-validacion">
+            Nombre y/o Firma Coordinador Operaciones
+        </td>
+
+    </tr>
+
+    <!-- Fecha -->
+
+    <tr>
+
+        <td class="fecha-firma">
+
+            Fecha:
+            <input type="date" class="campo-fecha">
+
+        </td>
+
+        <td class="fecha-firma">
+
+            Fecha:
+            <input type="date" class="campo-fecha">
+
+        </td>
+
+        <td class="fecha-firma">
+
+            Fecha:
+            <input type="date" class="campo-fecha">
+
+        </td>
+
+    </tr>
+
+</table>
