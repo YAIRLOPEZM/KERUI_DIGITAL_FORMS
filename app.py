@@ -106,9 +106,78 @@ def inicio():
         operacion3 = request.form.get("operacion3")
         frecuencia3 = request.form.get("frecuencia3")
 
+        permiso_trabajo = request.form.get("permiso_trabajo")
+        fecha_finalizacion = request.form.get("fecha_finalizacion")
+        hora_final = request.form.get("hora_final")
+        prioridad = request.form.get("prioridad")
+        especialidad = request.form.get("especialidad")
+
+        # ==========================================
+        # REPORTE TÉCNICO
+        # ==========================================
+
+        actividad_realizada = request.form.get("actividad_realizada")
+        como_quedo = request.form.get("como_quedo")
+        recomendaciones = request.form.get("recomendaciones")
+
+        # ==========================================
+        # INFORME DE FALLA
+        # ==========================================
+
+        parte_fallo = request.form.get("parte_fallo")
+        causa_falla = request.form.get("causa_falla")
+        parada = request.form.get("parada")
+        tiempo_fuera = request.form.get("tiempo_fuera")
+        tiempo_reparacion = request.form.get("tiempo_reparacion")
+
+        # ==========================================
+        # REPUESTOS UTILIZADOS (5 filas)
+        # ==========================================
+
+        repuestos = []
+
+        for i in range(1, 6):
+            repuestos.append({
+                "item": request.form.get(f"repuesto{i}_item") or "",
+                "descripcion": request.form.get(f"repuesto{i}_descripcion") or "",
+                "parte": request.form.get(f"repuesto{i}_parte") or "",
+                "cantidad": request.form.get(f"repuesto{i}_cantidad") or "",
+            })
+
+        # ==========================================
+        # PERSONAL TÉCNICO (4 filas)
+        # ==========================================
+
+        tecnicos = [
+            {
+                "nombre": tecnico_nombre or "",
+                "apellidos": tecnico_apellidos or "",
+                "fecha": request.form.get("tecnico1_fecha") or "",
+                "horas": request.form.get("tecnico1_horas") or "",
+                "extra": request.form.get("tecnico1_extra") or "",
+            }
+        ]
+
+        for i in range(2, 5):
+            tecnicos.append({
+                "nombre": request.form.get(f"tecnico_nombre{i}") or "",
+                "apellidos": request.form.get(f"tecnico_apellidos{i}") or "",
+                "fecha": request.form.get(f"tecnico{i}_fecha") or "",
+                "horas": request.form.get(f"tecnico{i}_horas") or "",
+                "extra": request.form.get(f"tecnico{i}_extra") or "",
+            })
+
+        # ==========================================
+        # FIRMAS
+        # ==========================================
+
         firma_tecnico = request.form.get("firma_tecnico")
         firma_supervisor = request.form.get("firma_supervisor")
         firma_coordinador = request.form.get("firma_coordinador")
+
+        fecha_firma_tecnico = request.form.get("fecha_firma_tecnico")
+        fecha_firma_supervisor = request.form.get("fecha_firma_supervisor")
+        fecha_firma_coordinador = request.form.get("fecha_firma_coordinador")
 
         # Si algún campo de texto no se llenó, que quede vacío
         # en vez de aparecer como la palabra "None" en el PDF.
@@ -129,6 +198,22 @@ def inicio():
         frecuencia2 = frecuencia2 or ""
         operacion3 = operacion3 or ""
         frecuencia3 = frecuencia3 or ""
+        permiso_trabajo = permiso_trabajo or ""
+        fecha_finalizacion = fecha_finalizacion or ""
+        hora_final = hora_final or ""
+        prioridad = prioridad or ""
+        especialidad = especialidad or ""
+        actividad_realizada = actividad_realizada or ""
+        como_quedo = como_quedo or ""
+        recomendaciones = recomendaciones or ""
+        parte_fallo = parte_fallo or ""
+        causa_falla = causa_falla or ""
+        parada = parada or ""
+        tiempo_fuera = tiempo_fuera or ""
+        tiempo_reparacion = tiempo_reparacion or ""
+        fecha_firma_tecnico = fecha_firma_tecnico or ""
+        fecha_firma_supervisor = fecha_firma_supervisor or ""
+        fecha_firma_coordinador = fecha_firma_coordinador or ""
 
         numero_ot = obtener_siguiente_ot()
 
@@ -219,9 +304,40 @@ def inicio():
             operacion3=operacion3,
             frecuencia3=frecuencia3,
 
+            permiso_trabajo=permiso_trabajo,
+            fecha_finalizacion=fecha_finalizacion,
+            hora_final=hora_final,
+            prioridad=prioridad,
+            especialidad=especialidad,
+
+            actividad_realizada=actividad_realizada,
+            como_quedo=como_quedo,
+            recomendaciones=recomendaciones,
+
+            parte_fallo=parte_fallo,
+            causa_falla=causa_falla,
+            parada=parada,
+            tiempo_fuera=tiempo_fuera,
+            tiempo_reparacion=tiempo_reparacion,
+
+            repuestos=repuestos,
+            tecnicos=tecnicos,
+
+            fecha_firma_tecnico=fecha_firma_tecnico,
+            fecha_firma_supervisor=fecha_firma_supervisor,
+            fecha_firma_coordinador=fecha_firma_coordinador,
+
             firma_tecnico=
                 firma_tecnico
                 if firma_tecnico and "," in firma_tecnico
+                else "",
+            firma_supervisor=
+                firma_supervisor
+                if firma_supervisor and "," in firma_supervisor
+                else "",
+            firma_coordinador=
+                firma_coordinador
+                if firma_coordinador and "," in firma_coordinador
                 else ""
         )
 
