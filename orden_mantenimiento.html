@@ -268,6 +268,7 @@
             <input
                 type="text"
                 class="permiso"
+                name="permiso_trabajo"
                 placeholder="Número del permiso">
         </li>
 
@@ -301,7 +302,7 @@
             </td>
 
             <td class="col-fecha">
-                <input type="date" class="campo">
+                <input type="date" class="campo" name="fecha">
             </td>
 
             <td class="titulo-celda">
@@ -309,7 +310,7 @@
             </td>
 
             <td class="col-hora">
-                <input type="time" class="campo">
+                <input type="time" class="campo" name="hora_inicio">
             </td>
 
             <td class="titulo-celda">
@@ -328,7 +329,7 @@
 
             <td class="col-prioridad">
 
-                <select class="campo">
+                <select class="campo" name="prioridad">
 
                     <option></option>
                     <option>ALTA</option>
@@ -345,7 +346,7 @@
             </td>
 
             <td class="col-fecha">
-                <input type="date" class="campo">
+                <input type="date" class="campo" name="fecha_finalizacion">
             </td>
 
             <td class="titulo-celda">
@@ -353,7 +354,7 @@
             </td>
 
              <td class="col-hora">
-                <input type="time" class="campo">
+                <input type="time" class="campo" name="hora_final">
             </td>
 
             <td class="titulo-celda">
@@ -361,7 +362,7 @@
             </td>
             <td colspan="3" class="col-especialidad">
 
-                <select class="campo">
+                <select class="campo" name="especialidad">
 
                     <option>ELECTRICO</option>
                     <option>INSTRUMENTACIÓN</option>
@@ -526,7 +527,7 @@
 
         <td>
 
-            <textarea class="reporte-corto"></textarea>
+            <textarea class="reporte-corto" name="actividad_realizada"></textarea>
 
         </td>
 
@@ -548,7 +549,7 @@
 
         <td>
 
-            <textarea class="reporte-tecnico"></textarea>
+            <textarea class="reporte-tecnico" name="como_quedo"></textarea>
 
         </td>
 
@@ -570,7 +571,7 @@
 
         <td>
 
-            <textarea class="reporte-tecnico"></textarea>
+            <textarea class="reporte-tecnico" name="recomendaciones"></textarea>
 
         </td>
 
@@ -618,25 +619,25 @@
 
         <td class="col-falla">
 
-            <input type="text" class="campo">
+            <input type="text" class="campo" name="parte_fallo">
 
         </td>
 
         <td class="col-causa">
 
-            <input type="text" class="campo">
+            <input type="text" class="campo" name="causa_falla">
 
         </td>
 
         <td class="col-parada parada">
 
         <label>
-            <input type="radio" name="parada">
+            <input type="radio" name="parada" value="Sí">
             Sí
         </label>
 
         <label>
-            <input type="radio" name="parada">
+            <input type="radio" name="parada" value="No">
             No
         </label>
         
@@ -645,13 +646,13 @@
 
         <td class="col-fuera">
 
-            <input type="text" class="campo">
+            <input type="text" class="campo" name="tiempo_fuera">
 
         </td>
 
         <td class="col-reparacion">
 
-            <input type="text" class="campo">
+            <input type="text" class="campo" name="tiempo_reparacion">
 
         </td>
 
@@ -694,38 +695,38 @@
 
         <!-- PRIMERA FILA DE DATOS -->
         <tr>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="number" class="campo"></td>
+        <td><input type="text" class="campo" name="repuesto1_item"></td>
+        <td><input type="text" class="campo" name="repuesto1_descripcion"></td>
+        <td><input type="text" class="campo" name="repuesto1_parte"></td>
+        <td><input type="number" class="campo" name="repuesto1_cantidad"></td>
     </tr>
 
     <tr>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="number" class="campo"></td>
+        <td><input type="text" class="campo" name="repuesto2_item"></td>
+        <td><input type="text" class="campo" name="repuesto2_descripcion"></td>
+        <td><input type="text" class="campo" name="repuesto2_parte"></td>
+        <td><input type="number" class="campo" name="repuesto2_cantidad"></td>
     </tr>
 
     <tr>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="number" class="campo"></td>
+        <td><input type="text" class="campo" name="repuesto3_item"></td>
+        <td><input type="text" class="campo" name="repuesto3_descripcion"></td>
+        <td><input type="text" class="campo" name="repuesto3_parte"></td>
+        <td><input type="number" class="campo" name="repuesto3_cantidad"></td>
     </tr>
 
     <tr>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="number" class="campo"></td>
+        <td><input type="text" class="campo" name="repuesto4_item"></td>
+        <td><input type="text" class="campo" name="repuesto4_descripcion"></td>
+        <td><input type="text" class="campo" name="repuesto4_parte"></td>
+        <td><input type="number" class="campo" name="repuesto4_cantidad"></td>
     </tr>
 
     <tr>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="text" class="campo"></td>
-        <td><input type="number" class="campo"></td>
+        <td><input type="text" class="campo" name="repuesto5_item"></td>
+        <td><input type="text" class="campo" name="repuesto5_descripcion"></td>
+        <td><input type="text" class="campo" name="repuesto5_parte"></td>
+        <td><input type="number" class="campo" name="repuesto5_cantidad"></td>
     </tr>
 
     </table>
@@ -789,7 +790,7 @@
         <input
             type="date"
             class="campo"
-            name="fecha"
+            name="tecnico1_fecha"
             required>
     </td>
 
@@ -797,14 +798,14 @@
         <input
             type="number"
             class="campo"
-            name="hora_inicio">
+            name="tecnico1_horas">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_fin">
+            name="tecnico1_extra">
     </td>
 
 </tr>
@@ -829,21 +830,21 @@
         <input
             type="date"
             class="campo"
-            name="fecha">
+            name="tecnico2_fecha">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_inicio">
+            name="tecnico2_horas">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_fin">
+            name="tecnico2_extra">
     </td>
 
 </tr>
@@ -867,21 +868,21 @@
         <input
             type="date"
             class="campo"
-            name="fecha">
+            name="tecnico3_fecha">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_inicio">
+            name="tecnico3_horas">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_fin">
+            name="tecnico3_extra">
     </td>
 
 </tr>
@@ -906,21 +907,21 @@
         <input
             type="date"
             class="campo"
-            name="fecha">
+            name="tecnico4_fecha">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_inicio">
+            name="tecnico4_horas">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="hora_fin">
+            name="tecnico4_extra">
     </td>
 
 </tr>
@@ -1039,7 +1040,8 @@
 
         <input
             type="date"
-            class="campo-fecha">
+            class="campo-fecha"
+            name="fecha_firma_tecnico">
 
     </td>
 
@@ -1049,7 +1051,8 @@
 
         <input
             type="date"
-            class="campo-fecha">
+            class="campo-fecha"
+            name="fecha_firma_supervisor">
 
     </td>
 
@@ -1059,7 +1062,8 @@
 
         <input
             type="date"
-            class="campo-fecha">
+            class="campo-fecha"
+            name="fecha_firma_coordinador">
 
     </td>
 

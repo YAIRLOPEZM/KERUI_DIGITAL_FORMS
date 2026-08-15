@@ -375,7 +375,7 @@
 
         PERMISO DE TRABAJO #
 
-        <span class="campo-pdf"></span>
+        <span class="campo-pdf">{{ permiso_trabajo }}</span>
 
     </li>
 
@@ -468,7 +468,9 @@
 
     <td class="col-prioridad">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">
+            {{ prioridad }}
+        </div>
 
     </td>
 
@@ -485,7 +487,9 @@
 
     <td class="col-fecha">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">
+            {{ fecha_finalizacion }}
+        </div>
 
     </td>
 
@@ -497,7 +501,9 @@
 
     <td class="col-hora">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">
+            {{ hora_final }}
+        </div>
 
     </td>
 
@@ -509,7 +515,9 @@
 
     <td colspan="3" class="col-especialidad">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">
+            {{ especialidad }}
+        </div>
 
     </td>
 
@@ -610,7 +618,7 @@
 
     <td>
 
-        <div class="campo-pdf espacio-pdf"></div>
+        <div class="campo-pdf espacio-pdf">{{ actividad_realizada }}</div>
 
     </td>
 
@@ -635,7 +643,7 @@
 
     <td>
 
-        <div class="campo-pdf espacio-pdf"></div>
+        <div class="campo-pdf espacio-pdf">{{ como_quedo }}</div>
 
     </td>
 
@@ -660,7 +668,7 @@
 
     <td>
 
-        <div class="campo-pdf espacio-pdf"></div>
+        <div class="campo-pdf espacio-pdf">{{ recomendaciones }}</div>
 
     </td>
 
@@ -721,31 +729,31 @@
 
     <td class="col-falla">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">{{ parte_fallo }}</div>
 
     </td>
 
     <td class="col-causa">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">{{ causa_falla }}</div>
 
     </td>
 
     <td class="col-parada parada">
 
-        <div class="campo-pdf-centro"></div>
+        <div class="campo-pdf-centro">{{ parada }}</div>
 
     </td>
 
     <td class="col-fuera">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">{{ tiempo_fuera }}</div>
 
     </td>
 
     <td class="col-reparacion">
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">{{ tiempo_reparacion }}</div>
 
     </td>
 
@@ -788,54 +796,16 @@
 </tr>
 
 
+{% for r in repuestos %}
 <tr>
 
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
+    <td><div class="campo-pdf">{{ r.item }}</div></td>
+    <td><div class="campo-pdf">{{ r.descripcion }}</div></td>
+    <td><div class="campo-pdf">{{ r.parte }}</div></td>
+    <td><div class="campo-pdf">{{ r.cantidad }}</div></td>
 
 </tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
+{% endfor %}
 
 </table>
 
@@ -878,14 +848,13 @@
 </tr>
 
 
+{% for t in tecnicos %}
 <tr>
 
     <td>
 
         <div class="campo-pdf">
-
-            {{ tecnico_nombre }}
-
+            {{ t.nombre }}
         </div>
 
     </td>
@@ -893,9 +862,7 @@
     <td>
 
         <div class="campo-pdf">
-
-            {{ tecnico_apellidos }}
-
+            {{ t.apellidos }}
         </div>
 
     </td>
@@ -903,9 +870,7 @@
     <td>
 
         <div class="campo-pdf">
-
-            {{ fecha }}
-
+            {{ t.fecha }}
         </div>
 
     </td>
@@ -913,65 +878,21 @@
     <td>
 
         <div class="campo-pdf">
-
-            {{ hora_inicio }}
-
+            {{ t.horas }}
         </div>
 
     </td>
 
     <td>
 
-        <div class="campo-pdf"></div>
+        <div class="campo-pdf">
+            {{ t.extra }}
+        </div>
 
     </td>
 
 </tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
-
-
-<tr>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-    <td><div class="campo-pdf"></div></td>
-
-</tr>
+{% endfor %}
 
 </table>
 
@@ -1013,7 +934,7 @@
 
         <div class="fecha-firma-pdf">
 
-            Fecha: __________________
+            Fecha: {{ fecha_firma_tecnico }}
 
         </div>
 
@@ -1024,7 +945,11 @@
 
         <div class="zona-firma-pdf">
 
-            <div class="espacio-firma"></div>
+            <div class="espacio-firma">
+                {% if firma_supervisor %}
+                <img src="{{ firma_supervisor }}" alt="Firma supervisor" style="max-height: 60px; max-width: 100%;">
+                {% endif %}
+            </div>
 
             <hr class="linea-firma-pdf">
 
@@ -1038,7 +963,7 @@
 
         <div class="fecha-firma-pdf">
 
-            Fecha: __________________
+            Fecha: {{ fecha_firma_supervisor }}
 
         </div>
 
@@ -1049,7 +974,11 @@
 
         <div class="zona-firma-pdf">
 
-            <div class="espacio-firma"></div>
+            <div class="espacio-firma">
+                {% if firma_coordinador %}
+                <img src="{{ firma_coordinador }}" alt="Firma coordinador" style="max-height: 60px; max-width: 100%;">
+                {% endif %}
+            </div>
 
             <hr class="linea-firma-pdf">
 
@@ -1063,7 +992,7 @@
 
         <div class="fecha-firma-pdf">
 
-            Fecha: __________________
+            Fecha: {{ fecha_firma_coordinador }}
 
         </div>
 
