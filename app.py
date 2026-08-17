@@ -1,24 +1,20 @@
-from flask import Flask, render_template, request, send_file
+from flask import Flask, render_template, request, send_file, abort, url_for
 import os
 import base64
+from datetime import date
+
 from pdf_generator import generar_pdf
 from onedrive_uploader import subir_pdf_a_onedrive
 
-
 from models import (
-
     crear_base_datos,
-
     guardar_orden,
-
     obtener_siguiente_ot,
-
     obtener_historial,
-
-    obtener_orden
-
+    obtener_orden,
+    guardar_firma_supervisor,
+    guardar_firma_coordinador,
 )
-from pdf_generator import generar_pdf
 
 app = Flask(__name__)
 
@@ -28,12 +24,11 @@ crear_base_datos()
 # ==========================================
 # INCRUSTAR CSS DIRECTAMENTE EN EL HTML
 # ==========================================
-# Esto es necesario porque el PDF se genera abriendo un
-# archivo HTML temporal desde el disco (file:///...), y en
-# ese caso la ruta /static/css/estilos.css no funciona (solo
-# funciona cuando Flask sirve la página por HTTP). Al incrustar
-# el CSS dentro de un <style>, el PDF sale con el formato
-# correcto sin importar cómo se abra el HTML.
+# Esto es necesario porque el PDF se genera con Playwright a
+# partir de un HTML que no siempre se sirve por HTTP, así que
+# la ruta /static/css/estilos.css no funcionaría ahí. Al
+# incrustar el CSS dentro de un <style>, el PDF sale con el
+# formato correcto sin importar cómo se genere el HTML.
 
 def cargar_css_inline():
 
@@ -54,11 +49,6 @@ def inyectar_css_inline():
 # ==========================================
 # INCRUSTAR EL LOGO DIRECTAMENTE EN EL HTML
 # ==========================================
-# Igual que con el CSS: al generar el PDF con Playwright
-# el HTML no se sirve por HTTP, así que las rutas tipo
-# /static/img/logo_kerui.png no cargarían. Se incrusta la
-# imagen como base64 para que siempre se vea, sin importar
-# cómo se genere el HTML.
 
 def cargar_logo_base64():
 
@@ -76,306 +66,196 @@ def inyectar_logo_inline():
     return dict(logo_base64=cargar_logo_base64())
 
 
+# ==========================================
+# CONSTRUIR EL HTML DEL PDF A PARTIR DE UNA ORDEN
+# ==========================================
+# Se usa tanto al guardar la orden por primera vez, como al
+# regenerar el PDF final cuando el coordinador firma. 'orden'
+# es un diccionario con las llaves de la base de datos (ver
+# models.py): nombre, apellidos, hora_inicio, equipo_sap, etc.
+
+def construir_html_pdf(orden):
+
+    return render_template(
+        "orden_pdf.html",
+
+        numero_ot=orden.get("numero_ot", ""),
+
+        tecnico_nombre=orden.get("nombre", ""),
+        tecnico_apellidos=orden.get("apellidos", ""),
+
+        fecha=orden.get("fecha", ""),
+        hora_inicio=orden.get("hora_inicio", ""),
+        horometro=orden.get("horometro", ""),
+
+        ubicacion=orden.get("ubicacion", ""),
+        equipo=orden.get("equipo", ""),
+        sap=orden.get("equipo_sap", ""),
+        numero_serie=orden.get("numero_serie", ""),
+
+        descripcion_orden=orden.get("descripcion_orden", ""),
+        tipo_orden=orden.get("tipo_orden", ""),
+
+        operacion1=orden.get("operacion1", ""),
+        frecuencia1=orden.get("frecuencia1", ""),
+        operacion2=orden.get("operacion2", ""),
+        frecuencia2=orden.get("frecuencia2", ""),
+        operacion3=orden.get("operacion3", ""),
+        frecuencia3=orden.get("frecuencia3", ""),
+
+        permiso_trabajo=orden.get("permiso_trabajo", ""),
+        fecha_finalizacion=orden.get("fecha_finalizacion", ""),
+        hora_final=orden.get("hora_final", ""),
+        prioridad=orden.get("prioridad", ""),
+        especialidad=orden.get("especialidad", ""),
+
+        actividad_realizada=orden.get("actividad_realizada", ""),
+        como_quedo=orden.get("como_quedo", ""),
+        recomendaciones=orden.get("recomendaciones", ""),
+
+        parte_fallo=orden.get("parte_fallo", ""),
+        causa_falla=orden.get("causa_falla", ""),
+        parada=orden.get("parada", ""),
+        tiempo_fuera=orden.get("tiempo_fuera", ""),
+        tiempo_reparacion=orden.get("tiempo_reparacion", ""),
+
+        repuestos=orden.get("repuestos", []),
+        tecnicos=orden.get("tecnicos", []),
+
+        fecha_firma_tecnico=orden.get("fecha_firma_tecnico", ""),
+        fecha_firma_supervisor=orden.get("fecha_firma_supervisor", ""),
+        fecha_firma_coordinador=orden.get("fecha_firma_coordinador", ""),
+
+        firma_tecnico=orden.get("firma_tecnico") or "",
+        firma_supervisor=orden.get("firma_supervisor") or "",
+        firma_coordinador=orden.get("firma_coordinador") or "",
+    )
+
+
+def _guardar_firma_como_archivo(numero_ot, rol, firma_data_uri):
+    """Guarda una copia de la firma como PNG en la carpeta 'firmas'."""
+
+    if not firma_data_uri or "," not in firma_data_uri:
+        return
+
+    encabezado, datos = firma_data_uri.split(",", 1)
+    imagen = base64.b64decode(datos)
+
+    if os.path.exists("firmas") and not os.path.isdir("firmas"):
+        os.remove("firmas")
+
+    os.makedirs("firmas", exist_ok=True)
+
+    ruta_firma = os.path.join("firmas", f"{numero_ot}_{rol}.png")
+
+    with open(ruta_firma, "wb") as archivo:
+        archivo.write(imagen)
+
+
 @app.route("/", methods=["GET", "POST"])
 def inicio():
 
     if request.method == "POST":
 
-        tecnico_nombre = request.form.get("tecnico_nombre")
-        tecnico_apellidos = request.form.get("tecnico_apellidos")
-        fecha = request.form.get("fecha")
-        horometro = request.form.get("horometro")
-        hora_inicio = request.form.get("hora_inicio")
-        ubicacion = request.form.get("ubicacion")
-        equipo_desc = request.form.get("equipo")
-        sap = request.form.get("sap")
-        serie = request.form.get("serie")
+        form = request.form
 
-        # ==========================================
-        # INFORMACIÓN GENERAL
-        # ==========================================
-
-        descripcion_orden = request.form.get("descripcion_orden")
-        tipo_orden = request.form.get("tipo_orden")
-
-        operacion1 = request.form.get("operacion1")
-        frecuencia1 = request.form.get("frecuencia1")
-
-        operacion2 = request.form.get("operacion2")
-        frecuencia2 = request.form.get("frecuencia2")
-
-        operacion3 = request.form.get("operacion3")
-        frecuencia3 = request.form.get("frecuencia3")
-
-        permiso_trabajo = request.form.get("permiso_trabajo")
-        fecha_finalizacion = request.form.get("fecha_finalizacion")
-        hora_final = request.form.get("hora_final")
-        prioridad = request.form.get("prioridad")
-        especialidad = request.form.get("especialidad")
-
-        # ==========================================
-        # REPORTE TÉCNICO
-        # ==========================================
-
-        actividad_realizada = request.form.get("actividad_realizada")
-        como_quedo = request.form.get("como_quedo")
-        recomendaciones = request.form.get("recomendaciones")
-
-        # ==========================================
-        # INFORME DE FALLA
-        # ==========================================
-
-        parte_fallo = request.form.get("parte_fallo")
-        causa_falla = request.form.get("causa_falla")
-        parada = request.form.get("parada")
-        tiempo_fuera = request.form.get("tiempo_fuera")
-        tiempo_reparacion = request.form.get("tiempo_reparacion")
-
-        # ==========================================
-        # REPUESTOS UTILIZADOS (5 filas)
-        # ==========================================
-
-        repuestos = []
-
-        for i in range(1, 6):
-            repuestos.append({
-                "item": request.form.get(f"repuesto{i}_item") or "",
-                "descripcion": request.form.get(f"repuesto{i}_descripcion") or "",
-                "parte": request.form.get(f"repuesto{i}_parte") or "",
-                "cantidad": request.form.get(f"repuesto{i}_cantidad") or "",
-            })
-
-        # ==========================================
-        # PERSONAL TÉCNICO (4 filas)
-        # ==========================================
+        repuestos = [
+            {
+                "item": form.get(f"repuesto{i}_item") or "",
+                "descripcion": form.get(f"repuesto{i}_descripcion") or "",
+                "parte": form.get(f"repuesto{i}_parte") or "",
+                "cantidad": form.get(f"repuesto{i}_cantidad") or "",
+            }
+            for i in range(1, 6)
+        ]
 
         tecnicos = [
             {
-                "nombre": tecnico_nombre or "",
-                "apellidos": tecnico_apellidos or "",
-                "fecha": request.form.get("tecnico1_fecha") or "",
-                "horas": request.form.get("tecnico1_horas") or "",
-                "extra": request.form.get("tecnico1_extra") or "",
+                "nombre": form.get("tecnico_nombre") or "",
+                "apellidos": form.get("tecnico_apellidos") or "",
+                "fecha": form.get("tecnico1_fecha") or "",
+                "horas": form.get("tecnico1_horas") or "",
+                "extra": form.get("tecnico1_extra") or "",
             }
         ]
 
         for i in range(2, 5):
             tecnicos.append({
-                "nombre": request.form.get(f"tecnico_nombre{i}") or "",
-                "apellidos": request.form.get(f"tecnico_apellidos{i}") or "",
-                "fecha": request.form.get(f"tecnico{i}_fecha") or "",
-                "horas": request.form.get(f"tecnico{i}_horas") or "",
-                "extra": request.form.get(f"tecnico{i}_extra") or "",
+                "nombre": form.get(f"tecnico_nombre{i}") or "",
+                "apellidos": form.get(f"tecnico_apellidos{i}") or "",
+                "fecha": form.get(f"tecnico{i}_fecha") or "",
+                "horas": form.get(f"tecnico{i}_horas") or "",
+                "extra": form.get(f"tecnico{i}_extra") or "",
             })
-
-        # ==========================================
-        # FIRMAS
-        # ==========================================
-
-        firma_tecnico = request.form.get("firma_tecnico")
-        firma_supervisor = request.form.get("firma_supervisor")
-        firma_coordinador = request.form.get("firma_coordinador")
-
-        fecha_firma_tecnico = request.form.get("fecha_firma_tecnico")
-        fecha_firma_supervisor = request.form.get("fecha_firma_supervisor")
-        fecha_firma_coordinador = request.form.get("fecha_firma_coordinador")
-
-        # Si algún campo de texto no se llenó, que quede vacío
-        # en vez de aparecer como la palabra "None" en el PDF.
-        tecnico_nombre = tecnico_nombre or ""
-        tecnico_apellidos = tecnico_apellidos or ""
-        fecha = fecha or ""
-        horometro = horometro or ""
-        hora_inicio = hora_inicio or ""
-        ubicacion = ubicacion or ""
-        equipo_desc = equipo_desc or ""
-        sap = sap or ""
-        serie = serie or ""
-        descripcion_orden = descripcion_orden or ""
-        tipo_orden = tipo_orden or ""
-        operacion1 = operacion1 or ""
-        frecuencia1 = frecuencia1 or ""
-        operacion2 = operacion2 or ""
-        frecuencia2 = frecuencia2 or ""
-        operacion3 = operacion3 or ""
-        frecuencia3 = frecuencia3 or ""
-        permiso_trabajo = permiso_trabajo or ""
-        fecha_finalizacion = fecha_finalizacion or ""
-        hora_final = hora_final or ""
-        prioridad = prioridad or ""
-        especialidad = especialidad or ""
-        actividad_realizada = actividad_realizada or ""
-        como_quedo = como_quedo or ""
-        recomendaciones = recomendaciones or ""
-        parte_fallo = parte_fallo or ""
-        causa_falla = causa_falla or ""
-        parada = parada or ""
-        tiempo_fuera = tiempo_fuera or ""
-        tiempo_reparacion = tiempo_reparacion or ""
-        fecha_firma_tecnico = fecha_firma_tecnico or ""
-        fecha_firma_supervisor = fecha_firma_supervisor or ""
-        fecha_firma_coordinador = fecha_firma_coordinador or ""
 
         numero_ot = obtener_siguiente_ot()
 
-        print("TIPO:", tipo_orden)
-        print("OPERACIÓN 1:", operacion1)
-        print("FRECUENCIA 1:", frecuencia1)
-        print("OPERACIÓN 2:", operacion2)
-        print("FRECUENCIA 2:", frecuencia2)
-        print("OPERACIÓN 3:", operacion3)
-        print("FRECUENCIA 3:", frecuencia3)
+        firma_tecnico = form.get("firma_tecnico") or ""
+        if "," not in firma_tecnico:
+            firma_tecnico = ""
 
-        print((firma_tecnico or "")[:50])
+        _guardar_firma_como_archivo(numero_ot, "tecnico", firma_tecnico)
 
-        # ==========================
-        # GUARDAR FIRMA DEL TÉCNICO
-        # ==========================
+        datos = {
+            "numero_ot": numero_ot,
+            "fecha": form.get("fecha") or "",
+            "hora_inicio": form.get("hora_inicio") or "",
+            "horometro": form.get("horometro") or "",
+            "nombre": form.get("tecnico_nombre") or "",
+            "apellidos": form.get("tecnico_apellidos") or "",
+            "ubicacion": form.get("ubicacion") or "",
+            "equipo": form.get("equipo") or "",
+            "equipo_sap": form.get("sap") or "",
+            "numero_serie": form.get("serie") or "",
 
-        if firma_tecnico:
+            "descripcion_orden": form.get("descripcion_orden") or "",
+            "tipo_orden": form.get("tipo_orden") or "",
+            "operacion1": form.get("operacion1") or "",
+            "frecuencia1": form.get("frecuencia1") or "",
+            "operacion2": form.get("operacion2") or "",
+            "frecuencia2": form.get("frecuencia2") or "",
+            "operacion3": form.get("operacion3") or "",
+            "frecuencia3": form.get("frecuencia3") or "",
 
-            if "," in firma_tecnico:
+            "permiso_trabajo": form.get("permiso_trabajo") or "",
+            "fecha_finalizacion": form.get("fecha_finalizacion") or "",
+            "hora_final": form.get("hora_final") or "",
+            "prioridad": form.get("prioridad") or "",
+            "especialidad": form.get("especialidad") or "",
 
-                encabezado, datos = firma_tecnico.split(",", 1)
+            "actividad_realizada": form.get("actividad_realizada") or "",
+            "como_quedo": form.get("como_quedo") or "",
+            "recomendaciones": form.get("recomendaciones") or "",
 
-                imagen = base64.b64decode(datos)
+            "parte_fallo": form.get("parte_fallo") or "",
+            "causa_falla": form.get("causa_falla") or "",
+            "parada": form.get("parada") or "",
+            "tiempo_fuera": form.get("tiempo_fuera") or "",
+            "tiempo_reparacion": form.get("tiempo_reparacion") or "",
 
-                if os.path.exists("firmas") and not os.path.isdir("firmas"):
-                    os.remove("firmas")
+            "repuestos": repuestos,
+            "tecnicos": tecnicos,
 
-                os.makedirs("firmas", exist_ok=True)
+            "firma_tecnico": firma_tecnico,
+            "fecha_firma_tecnico": form.get("fecha_firma_tecnico") or date.today().isoformat(),
+        }
 
-                ruta_firma = os.path.join(
-                    "firmas",
-                    f"{numero_ot}_tecnico.png"
-                )
+        guardar_orden(datos)
 
-                with open(ruta_firma, "wb") as archivo:
+        # PDF preliminar: ya tiene la firma del técnico, las
+        # de supervisor/coordinador quedan en blanco hasta que
+        # ellos aprueben desde su propio enlace.
+        html_pdf = construir_html_pdf(datos)
 
-                    archivo.write(imagen)
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
 
-                print("✅ Firma guardada:", ruta_firma)
-
-        guardar_orden(
+        return render_template(
+            "confirmacion.html",
             numero_ot=numero_ot,
-            fecha=fecha,
-            hora=hora_inicio,
-            horometro=horometro,
-            nombre=tecnico_nombre,
-            apellidos=tecnico_apellidos,
-            ubicacion=ubicacion,
-            equipo=equipo_desc,
-            equipo_sap=sap,
-            numero_serie=serie
-        )
-
-        # ==========================================
-        # CREAR HTML PARA EL PDF
-        # ==========================================
-
-        html_pdf = render_template(
-            "orden_pdf.html",
-
-            numero_ot=numero_ot,
-
-            tecnico_nombre=tecnico_nombre,
-
-            tecnico_apellidos=tecnico_apellidos,
-
-            fecha=fecha,
-
-            hora_inicio=hora_inicio,
-
-            horometro=horometro,
-
-            ubicacion=ubicacion,
-
-            equipo=equipo_desc,
-
-            sap=sap,
-
-            numero_serie=serie,
-            descripcion_orden=descripcion_orden,
-
-            tipo_orden=tipo_orden,
-
-            operacion1=operacion1,
-            frecuencia1=frecuencia1,
-
-            operacion2=operacion2,
-            frecuencia2=frecuencia2,
-
-            operacion3=operacion3,
-            frecuencia3=frecuencia3,
-
-            permiso_trabajo=permiso_trabajo,
-            fecha_finalizacion=fecha_finalizacion,
-            hora_final=hora_final,
-            prioridad=prioridad,
-            especialidad=especialidad,
-
-            actividad_realizada=actividad_realizada,
-            como_quedo=como_quedo,
-            recomendaciones=recomendaciones,
-
-            parte_fallo=parte_fallo,
-            causa_falla=causa_falla,
-            parada=parada,
-            tiempo_fuera=tiempo_fuera,
-            tiempo_reparacion=tiempo_reparacion,
-
-            repuestos=repuestos,
-            tecnicos=tecnicos,
-
-            fecha_firma_tecnico=fecha_firma_tecnico,
-            fecha_firma_supervisor=fecha_firma_supervisor,
-            fecha_firma_coordinador=fecha_firma_coordinador,
-
-            firma_tecnico=
-                firma_tecnico
-                if firma_tecnico and "," in firma_tecnico
-                else "",
-            firma_supervisor=
-                firma_supervisor
-                if firma_supervisor and "," in firma_supervisor
-                else "",
-            firma_coordinador=
-                firma_coordinador
-                if firma_coordinador and "," in firma_coordinador
-                else ""
-        )
-
-
-        # ==========================================
-        # GENERAR PDF
-        # ==========================================
-
-        ruta_pdf_generado = generar_pdf(
-
-            numero_ot,
-
-            html_pdf
-
-        )
-
-        # ==========================================
-        # SUBIR EL PDF A SHAREPOINT/ONEDRIVE
-        # ==========================================
-        # Se organiza en una carpeta por equipo/máquina.
-        # Si falla o no está configurado, no interrumpe
-        # la generación ni la entrega del PDF al usuario.
-
-        subir_pdf_a_onedrive(
-            ruta_pdf_generado,
-            numero_ot,
-            equipo_desc
-        )
-
-        return send_file(
-            ruta_pdf_generado,
-            mimetype="application/pdf",
-            as_attachment=False,
-            download_name=f"{numero_ot}.pdf"
+            pdf_link=url_for("pdf_descarga", numero_ot=numero_ot),
+            link_supervisor=url_for(
+                "aprobar_supervisor", numero_ot=numero_ot, _external=True
+            ),
         )
 
     numero_ot = obtener_siguiente_ot()
@@ -383,6 +263,164 @@ def inicio():
     return render_template(
         "orden_mantenimiento.html",
         numero_ot=numero_ot
+    )
+
+
+@app.route("/pdf-descarga/<numero_ot>")
+def pdf_descarga(numero_ot):
+
+    ruta_pdf = os.path.join("pdf", f"{numero_ot}.pdf")
+
+    if not os.path.exists(ruta_pdf):
+        abort(404)
+
+    return send_file(
+        ruta_pdf,
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=f"{numero_ot}.pdf"
+    )
+
+
+# ==========================================
+# APROBACIÓN DEL SUPERVISOR
+# ==========================================
+
+@app.route("/orden/<numero_ot>/aprobar/supervisor", methods=["GET", "POST"])
+def aprobar_supervisor(numero_ot):
+
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    if request.method == "POST":
+
+        if orden["estado"] != "PENDIENTE_SUPERVISOR":
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="Esta orden ya no está pendiente de la firma del supervisor.",
+                numero_ot=numero_ot
+            )
+
+        firma = request.form.get("firma") or ""
+
+        if "," not in firma:
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="No se recibió ninguna firma. Vuelve a intentarlo.",
+                numero_ot=numero_ot
+            )
+
+        _guardar_firma_como_archivo(numero_ot, "supervisor", firma)
+
+        guardar_firma_supervisor(
+            numero_ot,
+            firma,
+            date.today().isoformat()
+        )
+
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="✅ Firma de supervisor registrada. La orden queda pendiente del coordinador de operaciones.",
+            numero_ot=numero_ot,
+            siguiente_link=url_for(
+                "aprobar_coordinador", numero_ot=numero_ot, _external=True
+            )
+        )
+
+    if orden["estado"] != "PENDIENTE_SUPERVISOR":
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="Esta orden ya no está pendiente de la firma del supervisor "
+                    f"(estado actual: {orden['estado']}).",
+            numero_ot=numero_ot
+        )
+
+    return render_template(
+        "aprobar.html",
+        orden=orden,
+        rol="supervisor",
+        titulo="Firma del Supervisor / Ing. Mtto"
+    )
+
+
+# ==========================================
+# APROBACIÓN DEL COORDINADOR
+# ==========================================
+
+@app.route("/orden/<numero_ot>/aprobar/coordinador", methods=["GET", "POST"])
+def aprobar_coordinador(numero_ot):
+
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    if request.method == "POST":
+
+        if orden["estado"] != "PENDIENTE_COORDINADOR":
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="Esta orden ya no está pendiente de la firma del coordinador.",
+                numero_ot=numero_ot
+            )
+
+        firma = request.form.get("firma") or ""
+
+        if "," not in firma:
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="No se recibió ninguna firma. Vuelve a intentarlo.",
+                numero_ot=numero_ot
+            )
+
+        _guardar_firma_como_archivo(numero_ot, "coordinador", firma)
+
+        guardar_firma_coordinador(
+            numero_ot,
+            firma,
+            date.today().isoformat()
+        )
+
+        # ==========================================
+        # REGENERAR EL PDF FINAL (con las 3 firmas)
+        # ==========================================
+
+        orden_actualizada = obtener_orden(numero_ot)
+
+        html_pdf = construir_html_pdf(orden_actualizada)
+
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
+
+        # Ahora que la orden está 100% aprobada, se sube la
+        # versión definitiva a SharePoint/OneDrive.
+        subir_pdf_a_onedrive(
+            ruta_pdf_generado,
+            numero_ot,
+            orden_actualizada.get("equipo", "")
+        )
+
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="✅ Orden aprobada por completo. El PDF final ya quedó generado.",
+            numero_ot=numero_ot,
+            pdf_link=url_for("pdf_descarga", numero_ot=numero_ot)
+        )
+
+    if orden["estado"] != "PENDIENTE_COORDINADOR":
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="Esta orden todavía no está lista para la firma del coordinador "
+                    f"(estado actual: {orden['estado']}).",
+            numero_ot=numero_ot
+        )
+
+    return render_template(
+        "aprobar.html",
+        orden=orden,
+        rol="coordinador",
+        titulo="Firma del Coordinador de Operaciones"
     )
 
 
@@ -402,39 +440,24 @@ def ver_orden(numero_ot):
 
     orden = obtener_orden(numero_ot)
 
+    if orden is None:
+        abort(404)
+
     return render_template(
         "ver_orden.html",
         orden=orden
     )
 
-# ==========================================
-# RUTA PARA GENERAR PDF
-# ==========================================
 
 @app.route("/pdf/<numero_ot>")
 def vista_pdf(numero_ot):
 
     orden = obtener_orden(numero_ot)
 
-    return render_template(
-        "orden_pdf.html",
+    if orden is None:
+        abort(404)
 
-        numero_ot=numero_ot,
-
-        tecnico_nombre=orden["nombre"],
-        tecnico_apellidos=orden["apellidos"],
-
-        fecha=orden["fecha"],
-        hora_inicio=orden["hora"],
-
-        horometro=orden["horometro"],
-
-        ubicacion=orden["ubicacion"],
-
-        sap=orden["equipo_sap"],
-
-        numero_serie=orden["numero_serie"]
-    )
+    return construir_html_pdf(orden)
 
 
 if __name__ == "__main__":
