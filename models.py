@@ -7,7 +7,12 @@ DB_PATH = os.path.join("database", "ordenes.db")
 
 def crear_base_datos():
 
-    # Crear la carpeta si no existe
+    # Crear la carpeta si no existe. Si por algún motivo ya
+    # existe un ARCHIVO (no carpeta) llamado "database", se
+    # elimina primero para poder crear la carpeta correctamente.
+    if os.path.exists("database") and not os.path.isdir("database"):
+        os.remove("database")
+
     os.makedirs("database", exist_ok=True)
 
     conexion = sqlite3.connect(DB_PATH)

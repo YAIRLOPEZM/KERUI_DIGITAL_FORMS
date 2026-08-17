@@ -240,6 +240,9 @@ def inicio():
 
                 imagen = base64.b64decode(datos)
 
+                if os.path.exists("firmas") and not os.path.isdir("firmas"):
+                    os.remove("firmas")
+
                 os.makedirs("firmas", exist_ok=True)
 
                 ruta_firma = os.path.join(

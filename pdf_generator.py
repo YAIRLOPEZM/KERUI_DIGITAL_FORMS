@@ -9,6 +9,9 @@ def generar_pdf(numero_ot, html):
     # CREAR CARPETA PDF
     # ==========================================
 
+    if os.path.exists("pdf") and not os.path.isdir("pdf"):
+        os.remove("pdf")
+
     os.makedirs("pdf", exist_ok=True)
 
     # ==========================================
