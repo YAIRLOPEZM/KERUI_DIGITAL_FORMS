@@ -1,0 +1,1397 @@
+body{
+
+    margin:0;
+
+    background:#d9d9d9;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:flex-start;
+
+    padding:4px;
+
+    font-family:Arial, Helvetica, sans-serif;
+
+}
+
+.hoja{
+
+    width:210mm;
+
+    min-height:297mm;
+
+    background:white;
+
+    box-shadow:0px 0px 15px rgba(0,0,0,.25);
+
+    padding:6mm;
+
+    box-sizing:border-box;
+
+}
+.encabezado{
+
+    display:grid;
+
+    grid-template-columns:30mm 1fr 45mm;
+
+    height:15mm;
+
+    border:1.8px solid black;
+
+}
+.seccion{
+
+    background:#00A3E0;
+
+    color:white;
+
+    font-size:11px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+    padding:0px 3px;
+    
+    margin-top:2px;
+
+    height:18px;
+
+    line-height:18px;
+
+    border:1px solid black;
+
+}
+
+.logo{
+    width:150px;
+    border-right:1px solid #000;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
+
+.logo img{
+
+    max-width:70%;
+
+    max-height:70%;
+
+    object-fit:contain;
+    
+
+}
+
+.titulo{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-size:10px;
+    font-weight:bold;
+}
+
+.datos{
+
+    display:grid;
+
+    grid-template-columns:1fr 1fr;
+
+    grid-template-rows:repeat(3,1fr);
+
+}
+.celda{
+
+    border:1px solid black;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:10px;
+
+}
+
+.logo{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-weight:bold;
+
+}
+
+.titulo{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    text-align:center;
+
+}
+
+.datos{
+
+    display:grid;
+
+    grid-template-rows:repeat(3,1fr);
+
+}
+
+.fila{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0px 3px;
+
+    border-bottom:1px solid black;
+
+    font-size:10px;
+
+}
+
+.fila:last-child{
+
+    border-bottom:none;
+
+}
+
+.info-general{
+
+    border-left:1px solid black;
+
+    border-right:1px solid black;
+
+    border-bottom:1px solid black;
+
+}
+
+.info-general table{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.info-general th{
+
+    background:#E6E6E6;
+
+    border:1px solid black;
+
+    padding:4px;
+
+    text-align:left;
+
+    font-size:10px;
+
+}
+
+.info-general td{
+
+    border:1px solid black;
+
+    padding:4px;
+
+}
+
+.info-general input{
+
+    width:100%;
+
+    border:none;
+
+    outline:none;
+
+    font-size:10px;
+
+}
+
+.info-general textarea{
+
+    width:100%;
+
+    resize:none;
+
+    border:none;
+
+    outline:none;
+
+    font-size:10px;
+
+}
+
+/*==============================*/
+/* TABLA INFORMACIÓN GENERAL */
+/*==============================*/
+
+.tabla-info{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+}
+
+.tabla-info td{
+
+    border:1px solid black;
+
+    padding:3.5px;
+
+    font-size:10px;
+
+}
+
+.gris{
+
+    background:#e6e6e6;
+
+    font-weight:bold;
+
+}
+
+.etiqueta{
+
+    width:auto;
+    white-space:nowrap;
+
+}
+
+.centro{
+
+    text-align:center;
+
+    vertical-align:middle;
+
+}
+
+.tabla-info textarea{
+
+    width:100%;
+
+    height:30px;
+
+    border:none;
+
+    resize:none;
+
+    outline:none;
+
+    font-family:Arial;
+
+}
+
+.tabla-info input{
+
+    width:100%;
+
+    border:none;
+
+    outline:none;
+
+    font-family:Arial;
+
+    font-size:10px;
+
+}
+
+.recomendaciones{
+
+    border:1px solid black;
+
+    padding:0px 3px;
+
+    font-size:8px;
+
+    line-height:1.6;
+
+}
+
+.recomendaciones strong{
+
+    display:block;
+
+    margin-bottom:8px;
+
+}
+
+.recomendaciones ul{
+
+    margin:0;
+
+    padding-left:18px;
+
+}
+
+.recomendaciones li{
+
+    margin-bottom:4px;
+
+}
+
+.permiso{
+
+    width:100px;
+
+    border:none;
+
+    border-bottom:1px solid red;
+
+    background:transparent;
+
+    padding:2px;
+
+    font-size:10px;
+
+}
+
+/*====================================*/
+/* DATOS DEL TRABAJO */
+/*====================================*/
+
+.tabla-datos{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:8px;
+
+}
+
+.tabla-datos td{
+
+    border:1px solid black;
+    padding:0px 3px;
+    font-size:10px;
+
+}
+
+.titulo-celda{
+
+    background:#E8E8E8;
+    font-weight:bold;
+    white-space:nowrap;
+
+}
+
+.campo{
+
+    width:100%;
+    height:14px;
+    border:none;
+    outline:none;
+    font-size:10px;
+    font-family:Arial;
+    background:white;
+    box-sizing:border-box;
+}
+
+/*================================*/
+/* ANCHO DE LAS COLUMNAS */
+/*================================*/
+
+.col-fecha{
+
+    width:100px;
+    min-width:100px;
+}
+
+.col-hora{
+
+    width:80px;
+    min-width:80px;
+}
+
+.col-horometro{
+
+    width:105px;
+    min-width:105px;
+}
+
+.col-prioridad{
+
+    width:100px;
+    min-width:100px;
+}
+
+.col-descripcion{
+
+    width:330px;
+
+}
+
+.col-orden{
+
+    width:110px;
+    text-align:center;
+    vertical-align:middle;
+}
+
+.col-especialidad{
+
+    width:280px;
+
+}
+
+/*====================================*/
+/* TABLA UBICACIÓN DEL EQUIPO */
+/*====================================*/
+
+/* ==================================== */
+/* TABLA INFORMACIÓN DEL EQUIPO */
+/* ==================================== */
+
+.tabla-equipo {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    table-layout: fixed;
+
+}
+
+
+/* ==================================== */
+/* CELDAS */
+/* ==================================== */
+
+.tabla-equipo td {
+
+    border: 1px solid black;
+
+    padding: 2px 4px;
+
+    font-size: 10px;
+
+    font-family: Arial, sans-serif;
+
+    box-sizing: border-box;
+
+}
+
+
+/* ==================================== */
+/* ANCHOS */
+/* ==================================== */
+
+.tabla-equipo .col-ubicacion {
+
+    width: 25%;
+
+}
+
+
+.tabla-equipo .col-equipo {
+
+    width: 35%;
+
+}
+
+
+.tabla-equipo .col-sap {
+
+    width: 20%;
+
+}
+
+
+.tabla-equipo .col-serie {
+
+    width: 20%;
+
+}
+
+
+/* ==================================== */
+/* TÍTULOS */
+/* ==================================== */
+
+.tabla-equipo .titulo-equipo {
+
+    background: #E8E8E8;
+
+    font-weight: bold;
+
+    font-size: 10px;
+
+    padding: 2px 4px;
+
+    text-align: left;
+
+    white-space: nowrap;
+
+}
+
+/*====================================*/
+/* REPORTE TÉCNICO */
+/*====================================*/
+
+.tabla-reporte{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:6px;
+
+}
+
+.tabla-reporte td{
+
+    border:1px solid black;
+
+} 
+
+.titulo-reporte{
+
+    background:#E8E8E8;
+
+    font-weight:bold;
+
+    font-size:10px;
+
+    text-align:left;
+
+    padding:4px 8px;
+
+}
+
+.reporte-tecnico{
+
+    width:100%;
+
+    height:20px;
+
+    border:none;
+
+    resize:none;
+
+    outline:none;
+
+    font-size:10px;
+
+    font-family:Arial, sans-serif;
+
+    padding:8px;
+
+    box-sizing:border-box;
+
+} 
+
+.reporte-corto{
+
+    width:80%;
+
+    height:100px;
+
+    border:none;
+
+    resize:none;
+
+    outline:none;
+
+    padding:8px;
+
+    font-size:10px;
+
+    font-family:Arial, sans-serif;
+
+    box-sizing:border-box;
+
+}
+
+/*====================================*/
+/* 3. INFORME DE FALLA */
+/*====================================*/
+.tabla-falla{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:3px;
+
+}
+
+.titulo-falla{
+
+    background:#E8E8E8;
+
+    font-weight:bold;
+
+    font-size:10px;
+
+    text-align:center;
+
+    padding:0px 3px;
+
+    border:1px solid black;
+
+}
+
+.col-falla{
+
+    width:20%;
+
+}
+
+.col-causa{
+
+    width:30%;
+
+}
+
+.col-parada{
+
+    width:10%;
+
+}
+
+.col-fuera{
+
+    width:20%;
+
+}
+
+.col-reparacion{
+
+    width:20%;
+
+}
+
+.tabla-falla td{
+
+    border:1px solid black;
+
+    padding:1px;
+
+}
+
+.parada{
+
+    text-align:center;
+
+    vertical-align:middle;
+
+    font-size:10px;
+
+}
+
+.parada label {
+    display: inline-block; /* Cambiado de block a inline-block para que se alineen mejor si hay espacio */
+    margin: 0 4px;        /* Reduce el margen vertical de 3px a 0 */
+    cursor: pointer;
+}
+
+/*====================================*/
+/* 4. REPUESTOS UTILIZADOS */
+/*====================================*/
+.tabla-repuesto{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:3px;
+
+}
+
+.titulo-repuesto{
+
+    background:#E8E8E8;
+
+    font-weight:bold;
+
+    font-size:12px;
+
+    text-align:center;
+
+    padding:0px 3px;
+
+    border:1px solid black;
+
+}
+
+.tabla-repuesto td{
+
+    border:1px solid black;
+
+    padding:1px;
+
+}
+
+.col-item{
+
+    width:20%;
+
+}
+
+.col-repuesto{
+
+    width:40%;
+
+}
+
+.col-parte{
+
+    width:20%;
+
+}
+
+.col-cantidad{
+
+    width:10%;
+
+}
+
+/*====================================*/
+/* 5. PERSONAL TÉCNICO */
+/*====================================*/
+
+.tabla-personal{
+
+    width:100%;
+
+    border-collapse:collapse;
+
+    margin-top:3px;
+
+}
+
+.tabla-personal td{
+
+    border:1px solid black;
+
+    padding:2px;
+
+}
+
+.titulo-personal{
+
+    background:#E8E8E8;
+
+    font-weight:bold;
+
+    font-size:11px;
+
+    text-align:center;
+
+    padding:0px 3px;
+
+}
+
+.col-nombre{
+
+    width:25%;
+
+}
+
+.col-apellido{
+
+    width:25%;
+
+}
+
+.col-fecha-trabajo{
+
+    width:20%;
+
+}
+
+.col-horas{
+
+    width:15%;
+
+}
+
+.col-extras{
+
+    width:15%;
+
+}
+
+/*====================================*/
+/* 6. VALIDACIONES */
+/*====================================*/
+
+.tabla-validacion{
+
+    width:100%;
+    border-collapse:collapse;
+    margin-top:3px;
+
+}
+
+.tabla-validacion td{
+
+    border:1px solid black;
+    padding:3px;
+
+}
+
+.firma{
+
+    height:55px;
+
+}
+
+.titulo-validacion{
+
+    background:#E8E8E8;
+    font-weight:bold;
+    text-align:center;
+    font-size:10px;
+    padding:2px;
+
+}
+
+.fecha-firma{
+
+    font-size:11px;
+    text-align:left;
+    padding:2px;
+
+}
+
+.campo-fecha{
+
+    border:none;
+    outline:none;
+    font-size:11px;
+    font-family:Arial;
+    width:120px;
+
+}
+
+/*====================================*/
+/* BOTÓN GUARDAR */
+/*====================================*/
+
+.botones{
+
+    margin-top:15px;
+
+    text-align:center;
+
+}
+
+.btn-guardar{
+
+    background:#0B63CE;
+
+    color:white;
+
+    border:none;
+
+    padding:10px 30px;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+}
+
+.btn-guardar:hover{
+
+    background:#084C9E;
+
+}
+
+.numero-ot{
+
+    color:#C00000;
+
+    font-weight:bold;
+
+    font-size:12px;
+
+    text-align:center;
+
+    white-space:nowrap;
+}
+
+.tabla-validacion{
+
+    width:40%;
+
+    border-collapse:collapse;
+
+    margin-top:10px;
+
+}
+
+.tabla-validacion th{
+
+    background:#f3f4f4;
+
+    color:rgb(16, 14, 14);
+
+    padding:4px;
+
+    text-align:center;
+
+    font-size:10px;
+
+}
+
+.tabla-validacion td{
+
+    border:1px solid #bdbdbd;
+
+    padding:4px;
+
+    text-align:center;
+
+    vertical-align:top;
+
+}
+
+.tabla-validacion canvas{
+
+    border:2px solid #fffdfd;
+
+    border-radius:6px;
+
+    background:white;
+
+}
+
+.tabla-validacion button{
+
+    margin-top:8px;
+
+    padding:4px 15px;
+
+    border:none;
+
+    border-radius:5px;
+
+    background:#1976d2;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+.tabla-validacion button:hover{
+
+    background:#1565c0;
+
+}
+
+.btn-limpiar{
+
+    width:10px;
+
+    height:30px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#e53935;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    float:right;
+
+    margin-top:-120px;
+
+    margin-right:8px;
+
+}
+
+.btn-limpiar:hover{
+
+    background:#b71c1c;
+
+}
+
+.linea-firma{
+
+    margin-top:12px;
+
+    margin-bottom:8px;
+
+    border:0;
+
+    border-top:1px solid #444;
+
+}
+
+.titulo-firma{
+
+    font-weight:bold;
+
+    font-size:11px;
+
+    text-align:center;
+
+}
+/* =========================================================
+   CONFIGURACIÓN EXCLUSIVA PARA PDF
+   ========================================================= */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        zoom: 100%;
+    }
+    .hoja {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 6mm;
+        margin: 0;
+        box-sizing: border-box;
+        box-shadow: none;
+        background: white;
+    }
+        table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    td,
+    th {
+        box-sizing: border-box;
+    }
+        input,
+    select,
+    textarea {
+        color: #000;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        line-height: normal;
+        box-sizing: border-box;
+    }
+
+    input,
+    select {
+        height: 10px;
+    }
+
+    textarea {
+        resize: none;
+    }
+        .seccion,
+    .gris,
+    .titulo-celda,
+    .titulo-equipo,
+    .titulo-reporte,
+    .titulo-falla,
+    .titulo-repuesto,
+    .titulo-personal,
+    .titulo-validacion {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    html,
+    body {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 0;
+        background: white;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+    }
+
+    body {
+        display: block;
+    }
+
+    .hoja {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 6mm;
+        box-shadow: none;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .botones {
+        display: none !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    input,
+    select,
+    textarea {
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+}
+        tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    table {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    .seccion {
+        break-after: auto;
+        page-break-after: auto;
+}
+
+    /* ==========================================
+   CONFIGURACIÓN FINAL PARA PDF A4
+   ========================================== */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .hoja {
+        width: 210mm;
+        min-height: 0;
+        height: auto;
+
+        padding: 5mm;
+
+        margin: 0;
+
+        box-shadow: none;
+
+        box-sizing: border-box;
+    }
+
+    /* Evita que las secciones se separen */
+
+    table {
+    page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+
+    .seccion {
+        page-break-after: avoid;
+    }
+
+    .recomendaciones {
+        page-break-inside: avoid;
+    }
+
+    /* ==========================================
+       VALIDACIONES
+       ========================================== */
+
+    .tabla-validacion {
+
+        width: 100%;
+
+        margin-top: 3px;
+
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .tabla-validacion td {
+
+        padding: 2px;
+    }
+
+    .tabla-validacion canvas {
+
+        width: 190px;
+        height: 55px;
+    }
+
+    .linea-firma {
+
+        margin-top: 5px;
+        margin-bottom: 4px;
+    }
+
+    .titulo-firma {
+
+        font-size: 9px;
+    }
+
+    .campo-fecha {
+
+        font-size: 9px;
+        width: 90px;
+    }
+
+    /* ==========================================
+       REDUCIR ESPACIOS VERTICALES
+       ========================================== */
+
+    .recomendaciones {
+    border: 1px solid black;
+    padding: 0px 3px;
+    font-size: 8px;
+    line-height: 1.4;
+    }
+
+    .recomendaciones strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .recomendaciones li {
+        margin-bottom: 2px;
+    }
+
+    .tabla-datos {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+    }
+
+    .tabla-reporte {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 3px;
+    }
+
+    .reporte-tecnico {
+        width: 100%;
+        height: 17px;
+        border: none;
+        resize: none;
+        outline: none;
+        font-size: 10px;
+        font-family: Arial, sans-serif;
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    .reporte-corto {
+        width: 80%;
+        height: 70px;
+        border: none;
+        resize: none;
+        outline: none;
+        padding: 5px;
+        font-size: 10px;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+    }
+
+    .tabla-falla {
+
+        margin-top: 2px;
+    }
+
+    .tabla-repuesto {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2px;
+    }
+
+    .tabla-personal {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2px;
+    }
+
+    .seccion {
+
+        margin-top: 1px;
+    }
+
+}
+
+    /* =========================================
+   AJUSTE FINAL - FIRMAS EN LA MISMA HOJA
+   ========================================= */
+
+.tabla-validacion {
+    width: 100% !important;
+    margin-top: 2px !important;
+    border-collapse: collapse !important;
+    page-break-inside: avoid !important;
+}
+
+.tabla-validacion tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
+
+.tabla-validacion td {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    padding: 2px !important;
+    vertical-align: top !important;
+}
+
+.zona-firma-pdf {
+    height: 85px !important;
+}
+
+.espacio-firma {
+    height: 55px !important;
+}
+
+.linea-firma-pdf {
+    margin: 3px 10px !important;
+}
+
+.titulo-firma-pdf {
+    font-size: 9px !important;
+    line-height: 11px !important;
+}
+
+.fecha-firma-pdf {
+    font-size: 9px !important;
+    margin-top: 2px !important;
+}
