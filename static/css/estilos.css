@@ -397,14 +397,13 @@ body{
 .campo{
 
     width:100%;
-    height:10px;
+    height:14px;
     border:none;
     outline:none;
     font-size:10px;
     font-family:Arial;
     background:white;
     box-sizing:border-box;
-
 }
 
 /*================================*/
@@ -414,37 +413,38 @@ body{
 .col-fecha{
 
     width:100px;
-
+    min-width:100px;
 }
 
 .col-hora{
 
-    width:70px;
-
+    width:80px;
+    min-width:80px;
 }
 
 .col-horometro{
 
-    width:110px;
-
+    width:105px;
+    min-width:105px;
 }
 
 .col-prioridad{
 
-    width:120px;
-
+    width:100px;
+    min-width:100px;
 }
 
 .col-descripcion{
 
-    width:350px;
+    width:330px;
 
 }
 
 .col-orden{
 
-    width:0px;
-
+    width:110px;
+    text-align:center;
+    vertical-align:middle;
 }
 
 .col-especialidad{
@@ -457,63 +457,89 @@ body{
 /* TABLA UBICACIÓN DEL EQUIPO */
 /*====================================*/
 
-.tabla-equipo{
+/* ==================================== */
+/* TABLA INFORMACIÓN DEL EQUIPO */
+/* ==================================== */
 
-    width:100%;
+.tabla-equipo {
 
-    border-collapse:collapse;
+    width: 100%;
 
-}
+    border-collapse: collapse;
 
-.tabla-equipo td{
-
-    border:1px solid black;
-
-    padding:4px;
-
-    font-size:10px;
-
-    font-family:Arial, sans-serif;
+    table-layout: fixed;
 
 }
 
-.col-ubicacion{
 
-    width:22%;
+/* ==================================== */
+/* CELDAS */
+/* ==================================== */
 
-}
+.tabla-equipo td {
 
-.col-equipo{
+    border: 1px solid black;
 
-    width:43%;
+    padding: 2px 4px;
 
-}
+    font-size: 10px;
 
-.col-sap{
+    font-family: Arial, sans-serif;
 
-    width:17%;
-
-}
-
-.col-serie{
-
-    width:18%;
+    box-sizing: border-box;
 
 }
 
-.titulo-equipo{
 
-    background:#E8E8E8;
+/* ==================================== */
+/* ANCHOS */
+/* ==================================== */
 
-    font-weight:bold;
+.tabla-equipo .col-ubicacion {
 
-    font-size:10px;
+    width: 25%;
 
-    padding:2px 4px;
+}
 
-    text-align:left;
 
-    white-space:nowrap;
+.tabla-equipo .col-equipo {
+
+    width: 35%;
+
+}
+
+
+.tabla-equipo .col-sap {
+
+    width: 20%;
+
+}
+
+
+.tabla-equipo .col-serie {
+
+    width: 20%;
+
+}
+
+
+/* ==================================== */
+/* TÍTULOS */
+/* ==================================== */
+
+.tabla-equipo .titulo-equipo {
+
+    background: #E8E8E8;
+
+    font-weight: bold;
+
+    font-size: 10px;
+
+    padding: 2px 4px;
+
+    text-align: left;
+
+    white-space: nowrap;
 
 }
 
@@ -856,4 +882,516 @@ body{
     font-family:Arial;
     width:120px;
 
+}
+
+/*====================================*/
+/* BOTÓN GUARDAR */
+/*====================================*/
+
+.botones{
+
+    margin-top:15px;
+
+    text-align:center;
+
+}
+
+.btn-guardar{
+
+    background:#0B63CE;
+
+    color:white;
+
+    border:none;
+
+    padding:10px 30px;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+    border-radius:6px;
+
+    cursor:pointer;
+
+    transition:0.3s;
+
+}
+
+.btn-guardar:hover{
+
+    background:#084C9E;
+
+}
+
+.numero-ot{
+
+    color:#C00000;
+
+    font-weight:bold;
+
+    font-size:12px;
+
+    text-align:center;
+
+    white-space:nowrap;
+}
+
+.tabla-validacion{
+
+    width:40%;
+
+    border-collapse:collapse;
+
+    margin-top:10px;
+
+}
+
+.tabla-validacion th{
+
+    background:#f3f4f4;
+
+    color:rgb(16, 14, 14);
+
+    padding:4px;
+
+    text-align:center;
+
+    font-size:10px;
+
+}
+
+.tabla-validacion td{
+
+    border:1px solid #bdbdbd;
+
+    padding:4px;
+
+    text-align:center;
+
+    vertical-align:top;
+
+}
+
+.tabla-validacion canvas{
+
+    border:2px solid #fffdfd;
+
+    border-radius:6px;
+
+    background:white;
+
+}
+
+.tabla-validacion button{
+
+    margin-top:8px;
+
+    padding:4px 15px;
+
+    border:none;
+
+    border-radius:5px;
+
+    background:#1976d2;
+
+    color:white;
+
+    cursor:pointer;
+
+}
+
+.tabla-validacion button:hover{
+
+    background:#1565c0;
+
+}
+
+.btn-limpiar{
+
+    width:10px;
+
+    height:30px;
+
+    border:none;
+
+    border-radius:50%;
+
+    background:#e53935;
+
+    color:white;
+
+    cursor:pointer;
+
+    font-size:15px;
+
+    float:right;
+
+    margin-top:-120px;
+
+    margin-right:8px;
+
+}
+
+.btn-limpiar:hover{
+
+    background:#b71c1c;
+
+}
+
+.linea-firma{
+
+    margin-top:12px;
+
+    margin-bottom:8px;
+
+    border:0;
+
+    border-top:1px solid #444;
+
+}
+
+.titulo-firma{
+
+    font-weight:bold;
+
+    font-size:11px;
+
+    text-align:center;
+
+}
+/* =========================================================
+   CONFIGURACIÓN EXCLUSIVA PARA PDF
+   ========================================================= */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+    body {
+        zoom: 100%;
+    }
+    .hoja {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 6mm;
+        margin: 0;
+        box-sizing: border-box;
+        box-shadow: none;
+        background: white;
+    }
+        table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    td,
+    th {
+        box-sizing: border-box;
+    }
+        input,
+    select,
+    textarea {
+        color: #000;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+        line-height: normal;
+        box-sizing: border-box;
+    }
+
+    input,
+    select {
+        height: 10px;
+    }
+
+    textarea {
+        resize: none;
+    }
+        .seccion,
+    .gris,
+    .titulo-celda,
+    .titulo-equipo,
+    .titulo-reporte,
+    .titulo-falla,
+    .titulo-repuesto,
+    .titulo-personal,
+    .titulo-validacion {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    html,
+    body {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 0;
+        background: white;
+        font-family: Arial, Helvetica, sans-serif;
+        font-size: 10px;
+    }
+
+    body {
+        display: block;
+    }
+
+    .hoja {
+        width: 210mm;
+        min-height: 297mm;
+        margin: 0;
+        padding: 6mm;
+        box-shadow: none;
+        background: white;
+        box-sizing: border-box;
+    }
+
+    .botones {
+        display: none !important;
+    }
+
+    button {
+        display: none !important;
+    }
+
+    input,
+    select,
+    textarea {
+        appearance: none;
+        -webkit-appearance: none;
+    }
+
+}
+        tr {
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
+    table {
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    .seccion {
+        break-after: auto;
+        page-break-after: auto;
+}
+
+    /* ==========================================
+   CONFIGURACIÓN FINAL PARA PDF A4
+   ========================================== */
+
+@media print {
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    html,
+    body {
+        margin: 0;
+        padding: 0;
+        background: white;
+    }
+
+    .hoja {
+        width: 210mm;
+        min-height: 0;
+        height: auto;
+
+        padding: 5mm;
+
+        margin: 0;
+
+        box-shadow: none;
+
+        box-sizing: border-box;
+    }
+
+    /* Evita que las secciones se separen */
+
+    table {
+    page-break-inside: auto;
+    }
+
+    tr {
+        page-break-inside: avoid;
+    }
+
+    .seccion {
+        page-break-after: avoid;
+    }
+
+    .recomendaciones {
+        page-break-inside: avoid;
+    }
+
+    /* ==========================================
+       VALIDACIONES
+       ========================================== */
+
+    .tabla-validacion {
+
+        width: 100%;
+
+        margin-top: 3px;
+
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+
+    .tabla-validacion td {
+
+        padding: 2px;
+    }
+
+    .tabla-validacion canvas {
+
+        width: 190px;
+        height: 55px;
+    }
+
+    .linea-firma {
+
+        margin-top: 5px;
+        margin-bottom: 4px;
+    }
+
+    .titulo-firma {
+
+        font-size: 9px;
+    }
+
+    .campo-fecha {
+
+        font-size: 9px;
+        width: 90px;
+    }
+
+    /* ==========================================
+       REDUCIR ESPACIOS VERTICALES
+       ========================================== */
+
+    .recomendaciones {
+    border: 1px solid black;
+    padding: 0px 3px;
+    font-size: 8px;
+    line-height: 1.4;
+    }
+
+    .recomendaciones strong {
+        display: block;
+        margin-bottom: 4px;
+    }
+
+    .recomendaciones li {
+        margin-bottom: 2px;
+    }
+
+    .tabla-datos {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 4px;
+    }
+
+    .tabla-reporte {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 3px;
+    }
+
+    .reporte-tecnico {
+        width: 100%;
+        height: 17px;
+        border: none;
+        resize: none;
+        outline: none;
+        font-size: 10px;
+        font-family: Arial, sans-serif;
+        padding: 5px;
+        box-sizing: border-box;
+    }
+
+    .reporte-corto {
+        width: 80%;
+        height: 70px;
+        border: none;
+        resize: none;
+        outline: none;
+        padding: 5px;
+        font-size: 10px;
+        font-family: Arial, sans-serif;
+        box-sizing: border-box;
+    }
+
+    .tabla-falla {
+
+        margin-top: 2px;
+    }
+
+    .tabla-repuesto {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2px;
+    }
+
+    .tabla-personal {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 2px;
+    }
+
+    .seccion {
+
+        margin-top: 1px;
+    }
+
+}
+
+    /* =========================================
+   AJUSTE FINAL - FIRMAS EN LA MISMA HOJA
+   ========================================= */
+
+.tabla-validacion {
+    width: 100% !important;
+    margin-top: 2px !important;
+    border-collapse: collapse !important;
+    page-break-inside: avoid !important;
+}
+
+.tabla-validacion tr {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+}
+
+.tabla-validacion td {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+    padding: 2px !important;
+    vertical-align: top !important;
+}
+
+.zona-firma-pdf {
+    height: 85px !important;
+}
+
+.espacio-firma {
+    height: 55px !important;
+}
+
+.linea-firma-pdf {
+    margin: 3px 10px !important;
+}
+
+.titulo-firma-pdf {
+    font-size: 9px !important;
+    line-height: 11px !important;
+}
+
+.fecha-firma-pdf {
+    font-size: 9px !important;
+    margin-top: 2px !important;
 }

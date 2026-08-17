@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, send_file
 import os
 import base64
 from pdf_generator import generar_pdf
+from onedrive_uploader import subir_pdf_a_onedrive
 
 
 from models import (
@@ -352,6 +353,19 @@ def inicio():
 
             html_pdf
 
+        )
+
+        # ==========================================
+        # SUBIR EL PDF A SHAREPOINT/ONEDRIVE
+        # ==========================================
+        # Se organiza en una carpeta por equipo/máquina.
+        # Si falla o no está configurado, no interrumpe
+        # la generación ni la entrega del PDF al usuario.
+
+        subir_pdf_a_onedrive(
+            ruta_pdf_generado,
+            numero_ot,
+            equipo_desc
         )
 
         return send_file(
