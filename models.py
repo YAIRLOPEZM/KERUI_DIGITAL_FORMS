@@ -1,36 +1,39 @@
-import sqlite3
 import os
 import json
 
-# Ruta donde estará la base de datos
-DB_PATH = os.path.join("database", "ordenes.db")
+import psycopg2
+import psycopg2.extras
+
+# ==========================================
+# CONEXIÓN A POSTGRES (Neon / Supabase)
+# ==========================================
+# La URL completa de conexión viene de la variable de entorno
+# DATABASE_URL (ej: postgresql://usuario:password@host/basedatos).
+# En Render se configura en Settings > Environment.
+# En local (Windows), como variable de entorno del sistema.
+
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
 
 
 def _conectar():
-    conexion = sqlite3.connect(DB_PATH)
-    conexion.row_factory = sqlite3.Row
-    return conexion
+    if not DATABASE_URL:
+        raise RuntimeError(
+            "Falta configurar la variable de entorno DATABASE_URL "
+            "(connection string de Neon/Supabase)."
+        )
+    return psycopg2.connect(DATABASE_URL, sslmode="require")
 
 
 def crear_base_datos():
 
-    # Crear la carpeta si no existe. Si por algún motivo ya
-    # existe un ARCHIVO (no carpeta) llamado "database", se
-    # elimina primero para poder crear la carpeta correctamente.
-    if os.path.exists("database") and not os.path.isdir("database"):
-        os.remove("database")
-
-    os.makedirs("database", exist_ok=True)
-
-    conexion = sqlite3.connect(DB_PATH)
-
+    conexion = _conectar()
     cursor = conexion.cursor()
 
     cursor.execute("""
 
     CREATE TABLE IF NOT EXISTS ordenes (
 
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
 
         numero_ot TEXT UNIQUE,
 
@@ -89,15 +92,99 @@ def crear_base_datos():
 
     conexion.commit()
 
+    # ==========================================
+    # AUTO-MIGRACIÓN
+    # ==========================================
+    # Igual que antes: si la tabla ya existía con menos columnas,
+    # agrega las que falten sin borrar los datos. Postgres soporta
+    # "ADD COLUMN IF NOT EXISTS" directamente, así que es incluso
+    # más simple que la versión de SQLite.
+
+    columnas_necesarias = {
+        "fecha": "TEXT",
+        "hora_inicio": "TEXT",
+        "horometro": "TEXT",
+        "nombre": "TEXT",
+        "apellidos": "TEXT",
+        "ubicacion": "TEXT",
+        "equipo": "TEXT",
+        "equipo_sap": "TEXT",
+        "numero_serie": "TEXT",
+        "descripcion_orden": "TEXT",
+        "tipo_orden": "TEXT",
+        "operacion1": "TEXT",
+        "frecuencia1": "TEXT",
+        "operacion2": "TEXT",
+        "frecuencia2": "TEXT",
+        "operacion3": "TEXT",
+        "frecuencia3": "TEXT",
+        "permiso_trabajo": "TEXT",
+        "fecha_finalizacion": "TEXT",
+        "hora_final": "TEXT",
+        "prioridad": "TEXT",
+        "especialidad": "TEXT",
+        "actividad_realizada": "TEXT",
+        "como_quedo": "TEXT",
+        "recomendaciones": "TEXT",
+        "parte_fallo": "TEXT",
+        "causa_falla": "TEXT",
+        "parada": "TEXT",
+        "tiempo_fuera": "TEXT",
+        "tiempo_reparacion": "TEXT",
+        "repuestos_json": "TEXT",
+        "tecnicos_json": "TEXT",
+        "firma_tecnico": "TEXT",
+        "fecha_firma_tecnico": "TEXT",
+        "firma_supervisor": "TEXT",
+        "fecha_firma_supervisor": "TEXT",
+        "firma_coordinador": "TEXT",
+        "fecha_firma_coordinador": "TEXT",
+        "estado": "TEXT DEFAULT 'PENDIENTE_SUPERVISOR'",
+    }
+
+    for columna, tipo in columnas_necesarias.items():
+        cursor.execute(
+            f"ALTER TABLE ordenes ADD COLUMN IF NOT EXISTS {columna} {tipo}"
+        )
+
+    conexion.commit()
+
+    # ==========================================
+    # TABLA DEL CONSECUTIVO (independiente de "ordenes")
+    # ==========================================
+    # Guarda el último número de OT usado en una sola fila.
+    # Así el consecutivo no depende de cuántas órdenes de
+    # prueba existan ni de si se borran o no.
+
+    cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS contador_ot (
+            id SERIAL PRIMARY KEY,
+            valor INTEGER NOT NULL
+        )
+
+    """)
+
+    cursor.execute("SELECT COUNT(*) FROM contador_ot")
+
+    if cursor.fetchone()[0] == 0:
+        # Primera vez que corre: arranca en 216, igual que antes.
+        # Ajusta este valor UNA sola vez, la primera vez que
+        # despliegues este cambio, si necesitas otro punto de partida.
+        cursor.execute("INSERT INTO contador_ot (valor) VALUES (216)")
+
+    conexion.commit()
+
+    cursor.close()
     conexion.close()
 
 
 def guardar_orden(datos):
     """
     Guarda una orden completa. 'datos' es un diccionario con
-    todas las llaves que necesita la orden (ver la lista de
-    columnas de la tabla). 'repuestos' y 'tecnicos' deben venir
-    como listas de diccionarios (se convierten a JSON aquí).
+    todas las llaves que necesita la orden. 'repuestos' y
+    'tecnicos' deben venir como listas de diccionarios (se
+    convierten a JSON aquí).
     """
 
     conexion = _conectar()
@@ -118,15 +205,15 @@ def guardar_orden(datos):
             estado
         )
         VALUES (
-            :numero_ot, :fecha, :hora_inicio, :horometro, :nombre, :apellidos,
-            :ubicacion, :equipo, :equipo_sap, :numero_serie,
-            :descripcion_orden, :tipo_orden,
-            :operacion1, :frecuencia1, :operacion2, :frecuencia2, :operacion3, :frecuencia3,
-            :permiso_trabajo, :fecha_finalizacion, :hora_final, :prioridad, :especialidad,
-            :actividad_realizada, :como_quedo, :recomendaciones,
-            :parte_fallo, :causa_falla, :parada, :tiempo_fuera, :tiempo_reparacion,
-            :repuestos_json, :tecnicos_json,
-            :firma_tecnico, :fecha_firma_tecnico,
+            %(numero_ot)s, %(fecha)s, %(hora_inicio)s, %(horometro)s, %(nombre)s, %(apellidos)s,
+            %(ubicacion)s, %(equipo)s, %(equipo_sap)s, %(numero_serie)s,
+            %(descripcion_orden)s, %(tipo_orden)s,
+            %(operacion1)s, %(frecuencia1)s, %(operacion2)s, %(frecuencia2)s, %(operacion3)s, %(frecuencia3)s,
+            %(permiso_trabajo)s, %(fecha_finalizacion)s, %(hora_final)s, %(prioridad)s, %(especialidad)s,
+            %(actividad_realizada)s, %(como_quedo)s, %(recomendaciones)s,
+            %(parte_fallo)s, %(causa_falla)s, %(parada)s, %(tiempo_fuera)s, %(tiempo_reparacion)s,
+            %(repuestos_json)s, %(tecnicos_json)s,
+            %(firma_tecnico)s, %(fecha_firma_tecnico)s,
             'PENDIENTE_SUPERVISOR'
         )
 
@@ -137,42 +224,67 @@ def guardar_orden(datos):
     })
 
     conexion.commit()
+    cursor.close()
     conexion.close()
 
 
 def obtener_siguiente_ot():
+    """
+    Toma el consecutivo de la tabla contador_ot (no de las
+    órdenes existentes) y lo incrementa en una sola operación
+    atómica, para que dos personas no puedan recibir el mismo
+    número si guardan al mismo tiempo.
+    """
 
     conexion = _conectar()
     cursor = conexion.cursor()
 
     cursor.execute("""
 
-        SELECT numero_ot
-
-        FROM ordenes
-
-        ORDER BY id DESC
-
-        LIMIT 1
+        UPDATE contador_ot
+        SET valor = valor + 1
+        RETURNING valor
 
     """)
 
-    ultimo = cursor.fetchone()
+    nuevo_valor = cursor.fetchone()[0]
 
+    conexion.commit()
+    cursor.close()
     conexion.close()
 
-    if ultimo is None:
+    return f"OM26-{nuevo_valor}"
 
-        return "OM26-216"
 
-    numero = int(ultimo["numero_ot"].split("-")[1])
+def establecer_consecutivo(numero):
+    """
+    Ajusta manualmente el consecutivo. Después de llamar esto
+    con, por ejemplo, establecer_consecutivo(250), la SIGUIENTE
+    orden que se cree será OM26-251 (el consecutivo siempre
+    entrega valor + 1, nunca el valor que le pongas tal cual).
+    """
 
-    siguiente = numero + 1
+    conexion = _conectar()
+    cursor = conexion.cursor()
 
-    return f"OM26-{siguiente}"
+    cursor.execute("""
+
+        UPDATE contador_ot
+        SET valor = %s
+
+    """, (numero,))
+
+    conexion.commit()
+    cursor.close()
+    conexion.close()
 
 
 def obtener_historial():
+    # OJO: historial.html accede a las columnas por posición
+    # (orden[1], orden[2]...), igual que hacía sqlite3.Row. Por
+    # eso aquí se usa el cursor normal (tuplas), NO RealDictCursor
+    # — RealDictCursor no soporta acceso por índice numérico y
+    # rompería esa plantilla.
 
     conexion = _conectar()
     cursor = conexion.cursor()
@@ -189,6 +301,7 @@ def obtener_historial():
 
     datos = cursor.fetchall()
 
+    cursor.close()
     conexion.close()
 
     return datos
@@ -202,7 +315,7 @@ def obtener_orden(numero_ot):
     """
 
     conexion = _conectar()
-    cursor = conexion.cursor()
+    cursor = conexion.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
     cursor.execute("""
 
@@ -210,12 +323,13 @@ def obtener_orden(numero_ot):
 
         FROM ordenes
 
-        WHERE numero_ot = ?
+        WHERE numero_ot = %s
 
     """, (numero_ot,))
 
     fila = cursor.fetchone()
 
+    cursor.close()
     conexion.close()
 
     if fila is None:
@@ -237,14 +351,15 @@ def guardar_firma_supervisor(numero_ot, firma, fecha):
     cursor.execute("""
 
         UPDATE ordenes
-        SET firma_supervisor = ?,
-            fecha_firma_supervisor = ?,
+        SET firma_supervisor = %s,
+            fecha_firma_supervisor = %s,
             estado = 'PENDIENTE_COORDINADOR'
-        WHERE numero_ot = ?
+        WHERE numero_ot = %s
 
     """, (firma, fecha, numero_ot))
 
     conexion.commit()
+    cursor.close()
     conexion.close()
 
 
@@ -256,12 +371,34 @@ def guardar_firma_coordinador(numero_ot, firma, fecha):
     cursor.execute("""
 
         UPDATE ordenes
-        SET firma_coordinador = ?,
-            fecha_firma_coordinador = ?,
+        SET firma_coordinador = %s,
+            fecha_firma_coordinador = %s,
             estado = 'APROBADA'
-        WHERE numero_ot = ?
+        WHERE numero_ot = %s
 
     """, (firma, fecha, numero_ot))
 
     conexion.commit()
+    cursor.close()
+    conexion.close()
+
+
+def eliminar_orden(numero_ot):
+    """
+    Borra una orden por completo de la base de datos.
+    No borra el PDF en OneDrive/SharePoint, solo el registro.
+    """
+
+    conexion = _conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+
+        DELETE FROM ordenes
+        WHERE numero_ot = %s
+
+    """, (numero_ot,))
+
+    conexion.commit()
+    cursor.close()
     conexion.close()
