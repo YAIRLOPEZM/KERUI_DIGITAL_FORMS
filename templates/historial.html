@@ -39,6 +39,10 @@
         ➕ Nueva Orden
     </a>
 
+    <a href="/historial/exportar" class="btn">
+        📊 Exportar a Excel
+    </a>
+
     <input
         class="buscar"
         placeholder="Buscar una Orden...">
@@ -55,6 +59,10 @@
 
     <th>Técnico</th>
 
+    <th>Equipo</th>
+
+    <th>Estado</th>
+
     <th>Acciones</th>
 
 </tr>
@@ -67,15 +75,25 @@
 
     <td>{{ orden[2] }}</td>
 
-    <td>{{ orden[4] }} {{ orden[5] }}</td>
+    <td>{{ orden[3] }} {{ orden[4] }}</td>
+
+    <td>{{ orden[5] }}</td>
+
+    <td>{{ orden[6] }}</td>
 
     <td class="acciones">
 
-    <a href="/orden/{{ orden[1] }}">👁</a>
+    <a href="/orden/{{ orden[1] }}" title="Ver resumen">👁</a>
 
-    📄
+    <a href="/pdf-descarga/{{ orden[1] }}" target="_blank" title="Ver PDF">📄</a>
 
-    🗑
+    <form
+        method="POST"
+        action="/orden/{{ orden[1] }}/eliminar"
+        class="form-eliminar"
+        onsubmit="return confirm('¿Eliminar la orden {{ orden[1] }}? Esta acción no se puede deshacer.');">
+        <button type="submit" class="btn-eliminar" title="Eliminar">🗑</button>
+    </form>
 
     </td>
 
