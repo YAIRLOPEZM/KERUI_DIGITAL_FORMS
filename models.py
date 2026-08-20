@@ -279,6 +279,28 @@ def establecer_consecutivo(numero):
     conexion.close()
 
 
+def previsualizar_siguiente_ot():
+    """
+    Muestra cuál SERÍA el próximo número de OT, SIN gastarlo
+    (solo lee, no incrementa). Se usa únicamente para mostrar
+    un número de referencia en el formulario en blanco, antes
+    de que el técnico guarde algo. El número real y definitivo
+    se asigna con obtener_siguiente_ot(), solo al guardar.
+    """
+
+    conexion = _conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("SELECT valor FROM contador_ot")
+
+    valor_actual = cursor.fetchone()[0]
+
+    cursor.close()
+    conexion.close()
+
+    return f"OM26-{valor_actual + 1}"
+
+
 def obtener_todas_las_ordenes():
     """
     Devuelve TODAS las órdenes con TODOS sus campos (para el

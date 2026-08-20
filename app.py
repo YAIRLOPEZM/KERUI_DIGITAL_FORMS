@@ -14,6 +14,7 @@ from models import (
     crear_base_datos,
     guardar_orden,
     obtener_siguiente_ot,
+    previsualizar_siguiente_ot,
     obtener_historial,
     obtener_todas_las_ordenes,
     obtener_orden,
@@ -264,7 +265,7 @@ def inicio():
             ),
         )
 
-    numero_ot = obtener_siguiente_ot()
+    numero_ot = previsualizar_siguiente_ot()
 
     return render_template(
         "orden_mantenimiento.html",
