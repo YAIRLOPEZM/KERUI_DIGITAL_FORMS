@@ -1,7 +1,11 @@
-from flask import Flask, render_template, request, send_file, abort, url_for
+from flask import Flask, render_template, request, send_file, abort, url_for, redirect
 import os
 import base64
+import io
 from datetime import date
+
+import openpyxl
+from openpyxl.styles import Font, PatternFill
 
 from pdf_generator import generar_pdf
 from onedrive_uploader import subir_pdf_a_onedrive
@@ -11,9 +15,11 @@ from models import (
     guardar_orden,
     obtener_siguiente_ot,
     obtener_historial,
+    obtener_todas_las_ordenes,
     obtener_orden,
     guardar_firma_supervisor,
     guardar_firma_coordinador,
+    eliminar_orden,
 )
 
 app = Flask(__name__)
@@ -320,6 +326,19 @@ def aprobar_supervisor(numero_ot):
             date.today().isoformat()
         )
 
+        # ==========================================
+        # REGENERAR EL PDF (con técnico + supervisor)
+        # ==========================================
+        # Así, cuando el coordinador entre a firmar, el link
+        # "Ver PDF" muestra las firmas hasta ahora, no la
+        # versión vieja de cuando solo había firmado el técnico.
+
+        orden_actualizada = obtener_orden(numero_ot)
+
+        html_pdf = construir_html_pdf(orden_actualizada)
+
+        generar_pdf(numero_ot, html_pdf)
+
         return render_template(
             "aprobar_estado.html",
             mensaje="✅ Firma de supervisor registrada. La orden queda pendiente del coordinador de operaciones.",
@@ -433,6 +452,147 @@ def historial():
         "historial.html",
         ordenes=ordenes
     )
+
+
+@app.route("/historial/exportar")
+def exportar_historial_excel():
+    """
+    Genera un Excel con TODOS los campos diligenciados de
+    TODAS las órdenes (no solo las columnas que se ven en
+    pantalla en /historial).
+    """
+
+    ordenes = obtener_todas_las_ordenes()
+
+    libro = openpyxl.Workbook()
+    hoja = libro.active
+    hoja.title = "Órdenes"
+
+    # ==========================================
+    # ENCABEZADOS
+    # ==========================================
+    # Se deja por fuera lo que no aporta en un Excel:
+    # id (interno), y las firmas en sí (son imágenes base64
+    # gigantes, no texto útil) — pero sí se incluye la FECHA
+    # de cada firma, que es el dato relevante para auditoría.
+
+    columnas = [
+        ("numero_ot", "N° OT"),
+        ("estado", "Estado"),
+        ("fecha", "Fecha"),
+        ("hora_inicio", "Hora inicio"),
+        ("horometro", "Horómetro"),
+        ("nombre", "Nombre técnico"),
+        ("apellidos", "Apellidos técnico"),
+        ("ubicacion", "Ubicación técnica"),
+        ("equipo", "Equipo"),
+        ("equipo_sap", "Equipo SAP"),
+        ("numero_serie", "N° de serie"),
+        ("descripcion_orden", "Descripción de la orden"),
+        ("tipo_orden", "Tipo de orden"),
+        ("operacion1", "Operación 1"),
+        ("frecuencia1", "Frecuencia 1"),
+        ("operacion2", "Operación 2"),
+        ("frecuencia2", "Frecuencia 2"),
+        ("operacion3", "Operación 3"),
+        ("frecuencia3", "Frecuencia 3"),
+        ("permiso_trabajo", "Permiso de trabajo"),
+        ("fecha_finalizacion", "Fecha finalización"),
+        ("hora_final", "Hora final"),
+        ("prioridad", "Prioridad"),
+        ("especialidad", "Especialidad"),
+        ("actividad_realizada", "Actividad realizada"),
+        ("como_quedo", "Cómo quedó"),
+        ("recomendaciones", "Recomendaciones"),
+        ("parte_fallo", "Parte que falló"),
+        ("causa_falla", "Causa de la falla"),
+        ("parada", "Parada"),
+        ("tiempo_fuera", "Tiempo fuera de servicio"),
+        ("tiempo_reparacion", "Tiempo de reparación"),
+        ("fecha_firma_tecnico", "Fecha firma técnico"),
+        ("fecha_firma_supervisor", "Fecha firma supervisor"),
+        ("fecha_firma_coordinador", "Fecha firma coordinador"),
+    ]
+
+    hoja.append([etiqueta for _, etiqueta in columnas])
+
+    for celda in hoja[1]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill(
+            start_color="1A7A3A", end_color="1A7A3A", fill_type="solid"
+        )
+
+    # ==========================================
+    # FILAS
+    # ==========================================
+
+    for orden in ordenes:
+
+        fila = [orden.get(clave, "") for clave, _ in columnas]
+
+        # repuestos y tecnicos son listas de diccionarios (venían
+        # del JSON guardado) — se convierten a texto legible,
+        # cada item separado por " | ".
+        repuestos = orden.get("repuestos") or []
+        tecnicos = orden.get("tecnicos") or []
+
+        fila.append(
+            " | ".join(
+                str(r.get("nombre", r) if isinstance(r, dict) else r)
+                for r in repuestos
+            )
+        )
+        fila.append(
+            " | ".join(
+                str(t.get("nombre", t) if isinstance(t, dict) else t)
+                for t in tecnicos
+            )
+        )
+
+        hoja.append(fila)
+
+    # Agrego los encabezados de las dos columnas extra que se
+    # llenaron arriba (repuestos y técnicos adicionales).
+    hoja.cell(row=1, column=len(columnas) + 1, value="Repuestos utilizados")
+    hoja.cell(row=1, column=len(columnas) + 2, value="Técnicos adicionales")
+    for col in (len(columnas) + 1, len(columnas) + 2):
+        celda = hoja.cell(row=1, column=col)
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill(
+            start_color="1A7A3A", end_color="1A7A3A", fill_type="solid"
+        )
+
+    # Ancho de columna automático, aproximado
+    for columna in hoja.columns:
+        largo_maximo = max(
+            (len(str(celda.value)) for celda in columna if celda.value), default=10
+        )
+        letra_columna = columna[0].column_letter
+        hoja.column_dimensions[letra_columna].width = min(largo_maximo + 2, 45)
+
+    archivo = io.BytesIO()
+    libro.save(archivo)
+    archivo.seek(0)
+
+    return send_file(
+        archivo,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="historial_ordenes.xlsx"
+    )
+
+
+@app.route("/orden/<numero_ot>/eliminar", methods=["POST"])
+def eliminar_orden_ruta(numero_ot):
+
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    eliminar_orden(numero_ot)
+
+    return redirect(url_for("historial"))
 
 
 @app.route("/orden/<numero_ot>")

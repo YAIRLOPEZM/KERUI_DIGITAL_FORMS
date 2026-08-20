@@ -279,6 +279,42 @@ def establecer_consecutivo(numero):
     conexion.close()
 
 
+def obtener_todas_las_ordenes():
+    """
+    Devuelve TODAS las órdenes con TODOS sus campos (para el
+    export a Excel) — a diferencia de obtener_historial(), que
+    solo trae las columnas necesarias para la tabla en pantalla.
+    """
+
+    conexion = _conectar()
+    cursor = conexion.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+    cursor.execute("""
+
+        SELECT *
+
+        FROM ordenes
+
+        ORDER BY id DESC
+
+    """)
+
+    filas = cursor.fetchall()
+
+    cursor.close()
+    conexion.close()
+
+    ordenes = []
+
+    for fila in filas:
+        orden = dict(fila)
+        orden["repuestos"] = json.loads(orden.get("repuestos_json") or "[]")
+        orden["tecnicos"] = json.loads(orden.get("tecnicos_json") or "[]")
+        ordenes.append(orden)
+
+    return ordenes
+
+
 def obtener_historial():
     # OJO: historial.html accede a las columnas por posición
     # (orden[1], orden[2]...), igual que hacía sqlite3.Row. Por
