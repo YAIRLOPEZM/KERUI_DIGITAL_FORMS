@@ -21,6 +21,8 @@ from models import (
     guardar_firma_supervisor,
     guardar_firma_coordinador,
     eliminar_orden,
+    guardar_pdf,
+    obtener_pdf,
 )
 
 app = Flask(__name__)
@@ -256,6 +258,9 @@ def inicio():
 
         ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
 
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
+
         return render_template(
             "confirmacion.html",
             numero_ot=numero_ot,
@@ -278,11 +283,24 @@ def pdf_descarga(numero_ot):
 
     ruta_pdf = os.path.join("pdf", f"{numero_ot}.pdf")
 
-    if not os.path.exists(ruta_pdf):
+    if os.path.exists(ruta_pdf):
+        return send_file(
+            ruta_pdf,
+            mimetype="application/pdf",
+            as_attachment=False,
+            download_name=f"{numero_ot}.pdf"
+        )
+
+    # El disco local de Render es temporal — si el archivo ya no
+    # está ahí (por un reinicio), se sirve desde el respaldo
+    # guardado en Neon.
+    contenido = obtener_pdf(numero_ot)
+
+    if contenido is None:
         abort(404)
 
     return send_file(
-        ruta_pdf,
+        io.BytesIO(contenido),
         mimetype="application/pdf",
         as_attachment=False,
         download_name=f"{numero_ot}.pdf"
@@ -338,7 +356,10 @@ def aprobar_supervisor(numero_ot):
 
         html_pdf = construir_html_pdf(orden_actualizada)
 
-        generar_pdf(numero_ot, html_pdf)
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
+
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
 
         return render_template(
             "aprobar_estado.html",
@@ -413,8 +434,14 @@ def aprobar_coordinador(numero_ot):
 
         ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
 
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
+
         # Ahora que la orden está 100% aprobada, se sube la
-        # versión definitiva a SharePoint/OneDrive.
+        # versión definitiva a SharePoint/OneDrive. Mientras IT
+        # no apruebe las credenciales, esta llamada simplemente
+        # no hace nada (o falla en silencio) — el respaldo real
+        # ya quedó asegurado en Neon justo arriba.
         subir_pdf_a_onedrive(
             ruta_pdf_generado,
             numero_ot,

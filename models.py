@@ -175,6 +175,26 @@ def crear_base_datos():
 
     conexion.commit()
 
+    # ==========================================
+    # TABLA DE RESPALDO DE PDFs (mientras no hay OneDrive)
+    # ==========================================
+    # Guarda el PDF como bytes directamente en Neon, para que
+    # sobreviva a los reinicios del disco temporal de Render,
+    # sin depender de que IT apruebe las credenciales de
+    # SharePoint/OneDrive.
+
+    cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS pdf_archivos (
+            numero_ot TEXT PRIMARY KEY,
+            contenido BYTEA NOT NULL,
+            actualizado TIMESTAMP DEFAULT NOW()
+        )
+
+    """)
+
+    conexion.commit()
+
     cursor.close()
     conexion.close()
 
@@ -460,3 +480,49 @@ def eliminar_orden(numero_ot):
     conexion.commit()
     cursor.close()
     conexion.close()
+
+
+def guardar_pdf(numero_ot, contenido_bytes):
+    """
+    Guarda (o reemplaza) el PDF de una orden directamente en
+    Neon, como respaldo mientras no haya OneDrive configurado.
+    """
+
+    conexion = _conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+
+        INSERT INTO pdf_archivos (numero_ot, contenido, actualizado)
+        VALUES (%s, %s, NOW())
+        ON CONFLICT (numero_ot)
+        DO UPDATE SET contenido = EXCLUDED.contenido, actualizado = NOW()
+
+    """, (numero_ot, psycopg2.Binary(contenido_bytes)))
+
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+
+
+def obtener_pdf(numero_ot):
+    """
+    Devuelve los bytes del PDF guardado en Neon para esa orden,
+    o None si no hay ninguno respaldado todavía.
+    """
+
+    conexion = _conectar()
+    cursor = conexion.cursor()
+
+    cursor.execute("""
+
+        SELECT contenido FROM pdf_archivos WHERE numero_ot = %s
+
+    """, (numero_ot,))
+
+    fila = cursor.fetchone()
+
+    cursor.close()
+    conexion.close()
+
+    return bytes(fila[0]) if fila else None
