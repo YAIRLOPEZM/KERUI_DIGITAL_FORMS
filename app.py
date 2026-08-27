@@ -1,4 +1,5 @@
 import json
+from zoneinfo import ZoneInfo
 
 import streamlit as st
 import streamlit_authenticator as stauth
@@ -156,9 +157,16 @@ st.caption(
 )
 
 if ultima_actualizacion:
+    # Neon guarda la hora en UTC; la convertimos a hora de Colombia
+    # solo para mostrarla (el dato guardado sigue siendo UTC, que es
+    # lo correcto).
+    hora_colombia = ultima_actualizacion.replace(
+        tzinfo=ZoneInfo("UTC")
+    ).astimezone(ZoneInfo("America/Bogota"))
+
     st.info(
         f"🕒 Última actualización de datos: "
-        f"{ultima_actualizacion.strftime('%d/%m/%Y %I:%M %p')}"
+        f"{hora_colombia.strftime('%d/%m/%Y %I:%M %p')}"
     )
 else:
     st.warning("🕒 Aún no hay registro de la última actualización de datos.")
@@ -322,6 +330,11 @@ def convertir_a_excel(dataframe):
     return buffer.getvalue()
 
 st.download_button(
+    "📊 Exportar esta vista a Excel",
+    data=convertir_a_excel(tabla_detalle),
+    file_name="seguimiento_rq_filtrado.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+)
     "📊 Exportar esta vista a Excel",
     data=convertir_a_excel(tabla_detalle),
     file_name="seguimiento_rq_filtrado.xlsx",
