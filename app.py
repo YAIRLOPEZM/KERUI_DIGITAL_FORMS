@@ -1,342 +1,657 @@
-import json
-from zoneinfo import ZoneInfo
+from flask import Flask, render_template, request, send_file, abort, url_for, redirect
+import os
+import base64
+import io
+from datetime import date
 
-import streamlit as st
-import streamlit_authenticator as stauth
-import yaml
-from yaml.loader import SafeLoader
-import pandas as pd
-import plotly.express as px
-import psycopg2
+import openpyxl
+from openpyxl.styles import Font, PatternFill
 
-st.set_page_config(
-    page_title="Seguimiento de RQ",
-    page_icon="📦",
-    layout="wide",
+from pdf_generator import generar_pdf
+from onedrive_uploader import subir_pdf_a_onedrive
+
+from models import (
+    crear_base_datos,
+    guardar_orden,
+    obtener_siguiente_ot,
+    previsualizar_siguiente_ot,
+    obtener_historial,
+    obtener_todas_las_ordenes,
+    obtener_orden,
+    guardar_firma_supervisor,
+    guardar_firma_coordinador,
+    eliminar_orden,
+    guardar_pdf,
+    obtener_pdf,
 )
 
-# ==========================================
-# LOGIN
-# ==========================================
+app = Flask(__name__)
 
-# Local: lee credentials.yaml. En Streamlit Cloud: lee de Secrets.
-if "credentials" in st.secrets:
-    config = {
-        "credentials": json.loads(st.secrets["credentials"]),
-        "cookie": {
-            "name": st.secrets["cookie_name"],
-            "key": st.secrets["cookie_key"],
-            "expiry_days": st.secrets["cookie_expiry_days"],
-        },
-    }
-else:
-    with open("credentials.yaml") as f:
-        config = yaml.load(f, Loader=SafeLoader)
+crear_base_datos()
 
-authenticator = stauth.Authenticate(
-    config["credentials"],
-    config["cookie"]["name"],
-    config["cookie"]["key"],
-    config["cookie"]["expiry_days"],
-)
-
-try:
-    authenticator.login()
-except Exception as e:
-    st.error(e)
-
-if st.session_state.get("authentication_status") is False:
-    st.error("Usuario o contraseña incorrectos")
-    st.stop()
-elif st.session_state.get("authentication_status") is None:
-    st.warning("Por favor ingresa tu usuario y contraseña")
-    st.stop()
 
 # ==========================================
-# A PARTIR DE AQUI, SOLO SE EJECUTA SI EL LOGIN FUE EXITOSO
-# (todo el dashboard original, indentado dentro de este bloque)
+# INCRUSTAR CSS DIRECTAMENTE EN EL HTML
+# ==========================================
+# Esto es necesario porque el PDF se genera con Playwright a
+# partir de un HTML que no siempre se sirve por HTTP, así que
+# la ruta /static/css/estilos.css no funcionaría ahí. Al
+# incrustar el CSS dentro de un <style>, el PDF sale con el
+# formato correcto sin importar cómo se genere el HTML.
+
+def cargar_css_inline():
+
+    ruta_css = os.path.join(app.static_folder, "css", "estilos.css")
+
+    try:
+        with open(ruta_css, "r", encoding="utf-8") as archivo_css:
+            return archivo_css.read()
+    except OSError:
+        return ""
+
+
+@app.context_processor
+def inyectar_css_inline():
+    return dict(css_inline=cargar_css_inline())
+
+
+# ==========================================
+# INCRUSTAR EL LOGO DIRECTAMENTE EN EL HTML
 # ==========================================
 
-authenticator.logout("Cerrar sesión", "sidebar")
-st.sidebar.write(f"Bienvenido, **{st.session_state.get('name')}**")
+def cargar_logo_base64():
+
+    ruta_logo = os.path.join(app.static_folder, "img", "logo_kerui.png")
+
+    try:
+        with open(ruta_logo, "rb") as archivo_logo:
+            return base64.b64encode(archivo_logo.read()).decode("utf-8")
+    except OSError:
+        return ""
 
 
-@st.cache_data(ttl=300)  # se refresca solo cada 5 minutos, no en cada clic
-def cargar_datos():
-    database_url = st.secrets["DATABASE_URL"]
-    conexion = psycopg2.connect(database_url, sslmode="require")
-    df = pd.read_sql(
-        "SELECT * FROM seguimiento_rq",
-        conexion,
-        parse_dates=["fecha_rq", "fecha_po", "fecha_ea", "fecha_factura"],
+@app.context_processor
+def inyectar_logo_inline():
+    return dict(logo_base64=cargar_logo_base64())
+
+
+# ==========================================
+# CONSTRUIR EL HTML DEL PDF A PARTIR DE UNA ORDEN
+# ==========================================
+# Se usa tanto al guardar la orden por primera vez, como al
+# regenerar el PDF final cuando el coordinador firma. 'orden'
+# es un diccionario con las llaves de la base de datos (ver
+# models.py): nombre, apellidos, hora_inicio, equipo_sap, etc.
+
+def construir_html_pdf(orden):
+
+    return render_template(
+        "orden_pdf.html",
+
+        numero_ot=orden.get("numero_ot", ""),
+
+        tecnico_nombre=orden.get("nombre", ""),
+        tecnico_apellidos=orden.get("apellidos", ""),
+
+        fecha=orden.get("fecha", ""),
+        hora_inicio=orden.get("hora_inicio", ""),
+        horometro=orden.get("horometro", ""),
+
+        ubicacion=orden.get("ubicacion", ""),
+        equipo=orden.get("equipo", ""),
+        sap=orden.get("equipo_sap", ""),
+        numero_serie=orden.get("numero_serie", ""),
+
+        descripcion_orden=orden.get("descripcion_orden", ""),
+        tipo_orden=orden.get("tipo_orden", ""),
+
+        operacion1=orden.get("operacion1", ""),
+        frecuencia1=orden.get("frecuencia1", ""),
+        operacion2=orden.get("operacion2", ""),
+        frecuencia2=orden.get("frecuencia2", ""),
+        operacion3=orden.get("operacion3", ""),
+        frecuencia3=orden.get("frecuencia3", ""),
+
+        permiso_trabajo=orden.get("permiso_trabajo", ""),
+        fecha_finalizacion=orden.get("fecha_finalizacion", ""),
+        hora_final=orden.get("hora_final", ""),
+        prioridad=orden.get("prioridad", ""),
+        especialidad=orden.get("especialidad", ""),
+
+        actividad_realizada=orden.get("actividad_realizada", ""),
+        como_quedo=orden.get("como_quedo", ""),
+        recomendaciones=orden.get("recomendaciones", ""),
+
+        parte_fallo=orden.get("parte_fallo", ""),
+        causa_falla=orden.get("causa_falla", ""),
+        parada=orden.get("parada", ""),
+        tiempo_fuera=orden.get("tiempo_fuera", ""),
+        tiempo_reparacion=orden.get("tiempo_reparacion", ""),
+
+        repuestos=orden.get("repuestos", []),
+        tecnicos=orden.get("tecnicos", []),
+
+        fecha_firma_tecnico=orden.get("fecha_firma_tecnico", ""),
+        fecha_firma_supervisor=orden.get("fecha_firma_supervisor", ""),
+        fecha_firma_coordinador=orden.get("fecha_firma_coordinador", ""),
+
+        firma_tecnico=orden.get("firma_tecnico") or "",
+        firma_supervisor=orden.get("firma_supervisor") or "",
+        firma_coordinador=orden.get("firma_coordinador") or "",
     )
-    conexion.close()
-    return df
 
 
-@st.cache_data(ttl=300)  # misma frecuencia de refresco que los datos
-def obtener_ultima_actualizacion():
-    database_url = st.secrets["DATABASE_URL"]
-    conexion = psycopg2.connect(database_url, sslmode="require")
-    cur = conexion.cursor()
-    cur.execute(
-        "SELECT ultima_actualizacion FROM metadata_actualizacion "
-        "ORDER BY id DESC LIMIT 1;"
+def _guardar_firma_como_archivo(numero_ot, rol, firma_data_uri):
+    """Guarda una copia de la firma como PNG en la carpeta 'firmas'."""
+
+    if not firma_data_uri or "," not in firma_data_uri:
+        return
+
+    encabezado, datos = firma_data_uri.split(",", 1)
+    imagen = base64.b64decode(datos)
+
+    if os.path.exists("firmas") and not os.path.isdir("firmas"):
+        os.remove("firmas")
+
+    os.makedirs("firmas", exist_ok=True)
+
+    ruta_firma = os.path.join("firmas", f"{numero_ot}_{rol}.png")
+
+    with open(ruta_firma, "wb") as archivo:
+        archivo.write(imagen)
+
+
+@app.route("/", methods=["GET", "POST"])
+def inicio():
+
+    if request.method == "POST":
+
+        form = request.form
+
+        repuestos = [
+            {
+                "item": form.get(f"repuesto{i}_item") or "",
+                "descripcion": form.get(f"repuesto{i}_descripcion") or "",
+                "parte": form.get(f"repuesto{i}_parte") or "",
+                "cantidad": form.get(f"repuesto{i}_cantidad") or "",
+            }
+            for i in range(1, 6)
+        ]
+
+        tecnicos = [
+            {
+                "nombre": form.get("tecnico_nombre") or "",
+                "apellidos": form.get("tecnico_apellidos") or "",
+                "fecha": form.get("tecnico1_fecha") or "",
+                "horas": form.get("tecnico1_horas") or "",
+                "extra": form.get("tecnico1_extra") or "",
+            }
+        ]
+
+        for i in range(2, 5):
+            tecnicos.append({
+                "nombre": form.get(f"tecnico_nombre{i}") or "",
+                "apellidos": form.get(f"tecnico_apellidos{i}") or "",
+                "fecha": form.get(f"tecnico{i}_fecha") or "",
+                "horas": form.get(f"tecnico{i}_horas") or "",
+                "extra": form.get(f"tecnico{i}_extra") or "",
+            })
+
+        numero_ot = obtener_siguiente_ot()
+
+        firma_tecnico = form.get("firma_tecnico") or ""
+        if "," not in firma_tecnico:
+            firma_tecnico = ""
+
+        _guardar_firma_como_archivo(numero_ot, "tecnico", firma_tecnico)
+
+        datos = {
+            "numero_ot": numero_ot,
+            "fecha": form.get("fecha") or "",
+            "hora_inicio": form.get("hora_inicio") or "",
+            "horometro": form.get("horometro") or "",
+            "nombre": form.get("tecnico_nombre") or "",
+            "apellidos": form.get("tecnico_apellidos") or "",
+            "ubicacion": form.get("ubicacion") or "",
+            "equipo": form.get("equipo") or "",
+            "equipo_sap": form.get("sap") or "",
+            "numero_serie": form.get("serie") or "",
+
+            "descripcion_orden": form.get("descripcion_orden") or "",
+            "tipo_orden": form.get("tipo_orden") or "",
+            "operacion1": form.get("operacion1") or "",
+            "frecuencia1": form.get("frecuencia1") or "",
+            "operacion2": form.get("operacion2") or "",
+            "frecuencia2": form.get("frecuencia2") or "",
+            "operacion3": form.get("operacion3") or "",
+            "frecuencia3": form.get("frecuencia3") or "",
+
+            "permiso_trabajo": form.get("permiso_trabajo") or "",
+            "fecha_finalizacion": form.get("fecha_finalizacion") or "",
+            "hora_final": form.get("hora_final") or "",
+            "prioridad": form.get("prioridad") or "",
+            "especialidad": form.get("especialidad") or "",
+
+            "actividad_realizada": form.get("actividad_realizada") or "",
+            "como_quedo": form.get("como_quedo") or "",
+            "recomendaciones": form.get("recomendaciones") or "",
+
+            "parte_fallo": form.get("parte_fallo") or "",
+            "causa_falla": form.get("causa_falla") or "",
+            "parada": form.get("parada") or "",
+            "tiempo_fuera": form.get("tiempo_fuera") or "",
+            "tiempo_reparacion": form.get("tiempo_reparacion") or "",
+
+            "repuestos": repuestos,
+            "tecnicos": tecnicos,
+
+            "firma_tecnico": firma_tecnico,
+            "fecha_firma_tecnico": form.get("fecha_firma_tecnico") or date.today().isoformat(),
+        }
+
+        guardar_orden(datos)
+
+        # PDF preliminar: ya tiene la firma del técnico, las
+        # de supervisor/coordinador quedan en blanco hasta que
+        # ellos aprueben desde su propio enlace.
+        html_pdf = construir_html_pdf(datos)
+
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
+
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
+
+        return render_template(
+            "confirmacion.html",
+            numero_ot=numero_ot,
+            pdf_link=url_for("pdf_descarga", numero_ot=numero_ot),
+            link_supervisor=url_for(
+                "aprobar_supervisor", numero_ot=numero_ot, _external=True
+            ),
+        )
+
+    numero_ot = previsualizar_siguiente_ot()
+
+    return render_template(
+        "orden_mantenimiento.html",
+        numero_ot=numero_ot
     )
-    resultado = cur.fetchone()
-    conexion.close()
-    return resultado[0] if resultado else None
 
 
-df = cargar_datos()
-ultima_actualizacion = obtener_ultima_actualizacion()
+@app.route("/pdf-descarga/<numero_ot>")
+def pdf_descarga(numero_ot):
+
+    ruta_pdf = os.path.join("pdf", f"{numero_ot}.pdf")
+
+    if os.path.exists(ruta_pdf):
+        return send_file(
+            ruta_pdf,
+            mimetype="application/pdf",
+            as_attachment=False,
+            download_name=f"{numero_ot}.pdf"
+        )
+
+    # El disco local de Render es temporal — si el archivo ya no
+    # está ahí (por un reinicio), se sirve desde el respaldo
+    # guardado en Neon.
+    contenido = obtener_pdf(numero_ot)
+
+    if contenido is None:
+        abort(404)
+
+    return send_file(
+        io.BytesIO(contenido),
+        mimetype="application/pdf",
+        as_attachment=False,
+        download_name=f"{numero_ot}.pdf"
+    )
+
 
 # ==========================================
-# BARRA LATERAL: FILTROS (equivalentes a los
-# "slicers" del dashboard original de Power BI)
+# APROBACIÓN DEL SUPERVISOR
 # ==========================================
 
-st.sidebar.title("📦 Filtros")
+@app.route("/orden/<numero_ot>/aprobar/supervisor", methods=["GET", "POST"])
+def aprobar_supervisor(numero_ot):
 
-anios = sorted(df["anio"].dropna().unique(), reverse=True)
-anio_sel = st.sidebar.multiselect("Año", anios, default=anios)
+    orden = obtener_orden(numero_ot)
 
-bodegas = sorted(df["bodega"].dropna().unique())
-bodega_sel = st.sidebar.multiselect("Bodega", bodegas)
+    if orden is None:
+        abort(404)
 
-proveedores = sorted(df["proveedor"].dropna().unique())
-proveedor_sel = st.sidebar.multiselect("Proveedor", proveedores)
+    if request.method == "POST":
 
-requisitores = sorted(df["requisitor"].dropna().unique())
-requisitor_sel = st.sidebar.multiselect("Requisitor", requisitores)
+        if orden["estado"] != "PENDIENTE_SUPERVISOR":
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="Esta orden ya no está pendiente de la firma del supervisor.",
+                numero_ot=numero_ot
+            )
 
-estados = sorted(df["estado_proceso"].dropna().unique())
-estado_sel = st.sidebar.multiselect("Estado del proceso", estados)
+        firma = request.form.get("firma") or ""
 
-numero_rq_busqueda = st.sidebar.text_input("Buscar N° de RQ")
-numero_po_busqueda = st.sidebar.text_input("Buscar N° de PO")
-item_busqueda = st.sidebar.text_input("Buscar descripción de ítem")
+        if "," not in firma:
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="No se recibió ninguna firma. Vuelve a intentarlo.",
+                numero_ot=numero_ot
+            )
+
+        _guardar_firma_como_archivo(numero_ot, "supervisor", firma)
+
+        guardar_firma_supervisor(
+            numero_ot,
+            firma,
+            date.today().isoformat()
+        )
+
+        # ==========================================
+        # REGENERAR EL PDF (con técnico + supervisor)
+        # ==========================================
+        # Así, cuando el coordinador entre a firmar, el link
+        # "Ver PDF" muestra las firmas hasta ahora, no la
+        # versión vieja de cuando solo había firmado el técnico.
+
+        orden_actualizada = obtener_orden(numero_ot)
+
+        html_pdf = construir_html_pdf(orden_actualizada)
+
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
+
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
+
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="✅ Firma de supervisor registrada. La orden queda pendiente del coordinador de operaciones.",
+            numero_ot=numero_ot,
+            siguiente_link=url_for(
+                "aprobar_coordinador", numero_ot=numero_ot, _external=True
+            )
+        )
+
+    if orden["estado"] != "PENDIENTE_SUPERVISOR":
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="Esta orden ya no está pendiente de la firma del supervisor "
+                    f"(estado actual: {orden['estado']}).",
+            numero_ot=numero_ot
+        )
+
+    return render_template(
+        "aprobar.html",
+        orden=orden,
+        rol="supervisor",
+        titulo="Firma del Supervisor / Ing. Mtto"
+    )
+
 
 # ==========================================
-# APLICAR FILTROS
+# APROBACIÓN DEL COORDINADOR
 # ==========================================
 
-df_filtrado = df.copy()
+@app.route("/orden/<numero_ot>/aprobar/coordinador", methods=["GET", "POST"])
+def aprobar_coordinador(numero_ot):
 
-if anio_sel:
-    df_filtrado = df_filtrado[df_filtrado["anio"].isin(anio_sel)]
-if bodega_sel:
-    df_filtrado = df_filtrado[df_filtrado["bodega"].isin(bodega_sel)]
-if proveedor_sel:
-    df_filtrado = df_filtrado[df_filtrado["proveedor"].isin(proveedor_sel)]
-if requisitor_sel:
-    df_filtrado = df_filtrado[df_filtrado["requisitor"].isin(requisitor_sel)]
-if estado_sel:
-    df_filtrado = df_filtrado[df_filtrado["estado_proceso"].isin(estado_sel)]
-if numero_rq_busqueda:
-    df_filtrado = df_filtrado[
-        df_filtrado["numero_rq"].str.contains(numero_rq_busqueda, case=False, na=False)
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    if request.method == "POST":
+
+        if orden["estado"] != "PENDIENTE_COORDINADOR":
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="Esta orden ya no está pendiente de la firma del coordinador.",
+                numero_ot=numero_ot
+            )
+
+        firma = request.form.get("firma") or ""
+
+        if "," not in firma:
+            return render_template(
+                "aprobar_estado.html",
+                mensaje="No se recibió ninguna firma. Vuelve a intentarlo.",
+                numero_ot=numero_ot
+            )
+
+        _guardar_firma_como_archivo(numero_ot, "coordinador", firma)
+
+        guardar_firma_coordinador(
+            numero_ot,
+            firma,
+            date.today().isoformat()
+        )
+
+        # ==========================================
+        # REGENERAR EL PDF FINAL (con las 3 firmas)
+        # ==========================================
+
+        orden_actualizada = obtener_orden(numero_ot)
+
+        html_pdf = construir_html_pdf(orden_actualizada)
+
+        ruta_pdf_generado = generar_pdf(numero_ot, html_pdf)
+
+        with open(ruta_pdf_generado, "rb") as f:
+            guardar_pdf(numero_ot, f.read())
+
+        # Ahora que la orden está 100% aprobada, se sube la
+        # versión definitiva a SharePoint/OneDrive. Mientras IT
+        # no apruebe las credenciales, esta llamada simplemente
+        # no hace nada (o falla en silencio) — el respaldo real
+        # ya quedó asegurado en Neon justo arriba.
+        subir_pdf_a_onedrive(
+            ruta_pdf_generado,
+            numero_ot,
+            orden_actualizada.get("equipo", "")
+        )
+
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="✅ Orden aprobada por completo. El PDF final ya quedó generado.",
+            numero_ot=numero_ot,
+            pdf_link=url_for("pdf_descarga", numero_ot=numero_ot)
+        )
+
+    if orden["estado"] != "PENDIENTE_COORDINADOR":
+        return render_template(
+            "aprobar_estado.html",
+            mensaje="Esta orden todavía no está lista para la firma del coordinador "
+                    f"(estado actual: {orden['estado']}).",
+            numero_ot=numero_ot
+        )
+
+    return render_template(
+        "aprobar.html",
+        orden=orden,
+        rol="coordinador",
+        titulo="Firma del Coordinador de Operaciones"
+    )
+
+
+@app.route("/historial")
+def historial():
+
+    ordenes = obtener_historial()
+
+    return render_template(
+        "historial.html",
+        ordenes=ordenes
+    )
+
+
+@app.route("/historial/exportar")
+def exportar_historial_excel():
+    """
+    Genera un Excel con TODOS los campos diligenciados de
+    TODAS las órdenes (no solo las columnas que se ven en
+    pantalla en /historial).
+    """
+
+    ordenes = obtener_todas_las_ordenes()
+
+    libro = openpyxl.Workbook()
+    hoja = libro.active
+    hoja.title = "Órdenes"
+
+    # ==========================================
+    # ENCABEZADOS
+    # ==========================================
+    # Se deja por fuera lo que no aporta en un Excel:
+    # id (interno), y las firmas en sí (son imágenes base64
+    # gigantes, no texto útil) — pero sí se incluye la FECHA
+    # de cada firma, que es el dato relevante para auditoría.
+
+    columnas = [
+        ("numero_ot", "N° OT"),
+        ("estado", "Estado"),
+        ("fecha", "Fecha"),
+        ("hora_inicio", "Hora inicio"),
+        ("horometro", "Horómetro"),
+        ("nombre", "Nombre técnico"),
+        ("apellidos", "Apellidos técnico"),
+        ("ubicacion", "Ubicación técnica"),
+        ("equipo", "Equipo"),
+        ("equipo_sap", "Equipo SAP"),
+        ("numero_serie", "N° de serie"),
+        ("descripcion_orden", "Descripción de la orden"),
+        ("tipo_orden", "Tipo de orden"),
+        ("operacion1", "Operación 1"),
+        ("frecuencia1", "Frecuencia 1"),
+        ("operacion2", "Operación 2"),
+        ("frecuencia2", "Frecuencia 2"),
+        ("operacion3", "Operación 3"),
+        ("frecuencia3", "Frecuencia 3"),
+        ("permiso_trabajo", "Permiso de trabajo"),
+        ("fecha_finalizacion", "Fecha finalización"),
+        ("hora_final", "Hora final"),
+        ("prioridad", "Prioridad"),
+        ("especialidad", "Especialidad"),
+        ("actividad_realizada", "Actividad realizada"),
+        ("como_quedo", "Cómo quedó"),
+        ("recomendaciones", "Recomendaciones"),
+        ("parte_fallo", "Parte que falló"),
+        ("causa_falla", "Causa de la falla"),
+        ("parada", "Parada"),
+        ("tiempo_fuera", "Tiempo fuera de servicio"),
+        ("tiempo_reparacion", "Tiempo de reparación"),
+        ("fecha_firma_tecnico", "Fecha firma técnico"),
+        ("fecha_firma_supervisor", "Fecha firma supervisor"),
+        ("fecha_firma_coordinador", "Fecha firma coordinador"),
     ]
-if numero_po_busqueda:
-    df_filtrado = df_filtrado[
-        df_filtrado["numero_po"].astype(str).str.contains(numero_po_busqueda, case=False, na=False)
-    ]
-if item_busqueda:
-    df_filtrado = df_filtrado[
-        df_filtrado["descripcion_item"].str.contains(item_busqueda, case=False, na=False)
-    ]
 
-# ==========================================
-# ENCABEZADO Y TARJETAS (KPIs)
-# ==========================================
+    hoja.append([etiqueta for _, etiqueta in columnas])
 
-st.title("Seguimiento de Requisiciones (RQ)")
-st.caption(
-    "Desde la requisición (RQ), pasando por la orden de compra (PO), "
-    "la entrada al almacén (EA), hasta la factura."
-)
+    for celda in hoja[1]:
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill(
+            start_color="1A7A3A", end_color="1A7A3A", fill_type="solid"
+        )
 
-if ultima_actualizacion:
-    # Neon guarda la hora en UTC; la convertimos a hora de Colombia
-    # solo para mostrarla (el dato guardado sigue siendo UTC, que es
-    # lo correcto).
-    hora_colombia = ultima_actualizacion.replace(
-        tzinfo=ZoneInfo("UTC")
-    ).astimezone(ZoneInfo("America/Bogota"))
+    # ==========================================
+    # FILAS
+    # ==========================================
 
-    st.info(
-        f"🕒 Última actualización de datos: "
-        f"{hora_colombia.strftime('%d/%m/%Y %I:%M %p')}"
+    for orden in ordenes:
+
+        fila = [orden.get(clave, "") for clave, _ in columnas]
+
+        # repuestos y tecnicos son listas de diccionarios (venían
+        # del JSON guardado) — se convierten a texto legible,
+        # cada item separado por " | ".
+        repuestos = orden.get("repuestos") or []
+        tecnicos = orden.get("tecnicos") or []
+
+        fila.append(
+            " | ".join(
+                str(r.get("nombre", r) if isinstance(r, dict) else r)
+                for r in repuestos
+            )
+        )
+        fila.append(
+            " | ".join(
+                str(t.get("nombre", t) if isinstance(t, dict) else t)
+                for t in tecnicos
+            )
+        )
+
+        hoja.append(fila)
+
+    # Agrego los encabezados de las dos columnas extra que se
+    # llenaron arriba (repuestos y técnicos adicionales).
+    hoja.cell(row=1, column=len(columnas) + 1, value="Repuestos utilizados")
+    hoja.cell(row=1, column=len(columnas) + 2, value="Técnicos adicionales")
+    for col in (len(columnas) + 1, len(columnas) + 2):
+        celda = hoja.cell(row=1, column=col)
+        celda.font = Font(bold=True, color="FFFFFF")
+        celda.fill = PatternFill(
+            start_color="1A7A3A", end_color="1A7A3A", fill_type="solid"
+        )
+
+    # Ancho de columna automático, aproximado
+    for columna in hoja.columns:
+        largo_maximo = max(
+            (len(str(celda.value)) for celda in columna if celda.value), default=10
+        )
+        letra_columna = columna[0].column_letter
+        hoja.column_dimensions[letra_columna].width = min(largo_maximo + 2, 45)
+
+    archivo = io.BytesIO()
+    libro.save(archivo)
+    archivo.seek(0)
+
+    return send_file(
+        archivo,
+        mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        as_attachment=True,
+        download_name="historial_ordenes.xlsx"
     )
-else:
-    st.warning("🕒 Aún no hay registro de la última actualización de datos.")
 
-col1, col2, col3, col4, col5 = st.columns(5)
 
-col1.metric("Total de RQ (filtradas)", f"{df_filtrado['numero_rq'].nunique():,}")
-col2.metric(
-    "RQ sin PO todavía",
-    f"{df_filtrado[df_filtrado['estado_proceso'] == 'RQ sin PO']['numero_rq'].nunique():,}",
-)
-col3.metric(
-    "PO sin recibir (EA)",
-    f"{df_filtrado[df_filtrado['estado_proceso'] == 'PO sin EA']['numero_po'].nunique():,}",
-)
-col4.metric(
-    "EA sin facturar",
-    f"{df_filtrado[df_filtrado['estado_proceso'] == 'EA sin Factura']['numero_ea'].nunique():,}",
-)
-col5.metric(
-    "Urgentes (Alerta RQ→PO)",
-    f"{(df_filtrado['alerta_rq_po'] == '🔴 URGENTE - Generar PO').sum():,}",
-)
+@app.route("/orden/<numero_ot>/eliminar", methods=["POST"])
+def eliminar_orden_ruta(numero_ot):
 
-st.divider()
+    orden = obtener_orden(numero_ot)
 
-# ==========================================
-# GRÁFICO DE DONA: Estado del proceso
-# ==========================================
+    if orden is None:
+        abort(404)
 
-col_izq, col_der = st.columns([1, 1.4])
+    eliminar_orden(numero_ot)
 
-with col_izq:
-    st.subheader("Estado del proceso")
-    conteo_estado = (
-        df_filtrado.drop_duplicates(subset=["numero_rq", "numero_po", "numero_ea", "numero_factura"])
-        ["estado_proceso"]
-        .value_counts()
-        .reset_index()
+    return redirect(url_for("historial"))
+
+
+@app.route("/orden/<numero_ot>")
+def ver_orden(numero_ot):
+
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    return render_template(
+        "ver_orden.html",
+        orden=orden
     )
-    conteo_estado.columns = ["Estado", "Cantidad"]
 
-    fig = px.pie(
-        conteo_estado,
-        names="Estado",
-        values="Cantidad",
-        hole=0.5,
-        color="Estado",
-        color_discrete_map={
-            "Factura recibida": "#1a7a3a",
-            "RQ sin PO": "#e63946",
-            "PO sin EA": "#f4a300",
-            "EA sin Factura": "#3b82c4",
-        },
+
+@app.route("/pdf/<numero_ot>")
+def vista_pdf(numero_ot):
+
+    orden = obtener_orden(numero_ot)
+
+    if orden is None:
+        abort(404)
+
+    return construir_html_pdf(orden)
+
+
+if __name__ == "__main__":
+
+    app.run(
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000)),
+        debug=True
     )
-    fig.update_traces(textinfo="percent+value")
-    st.plotly_chart(fig, use_container_width=True)
-
-with col_der:
-    st.subheader("Alertas RQ → PO")
-    conteo_alerta = (
-        df_filtrado.drop_duplicates(subset=["numero_rq"])
-        ["alerta_rq_po"]
-        .value_counts()
-        .reset_index()
-    )
-    conteo_alerta.columns = ["Alerta", "Cantidad"]
-    st.dataframe(conteo_alerta, use_container_width=True, hide_index=True)
-
-st.divider()
-
-# ==========================================
-# TABLA: Alertas de tiempo
-# ==========================================
-
-st.subheader("⏱️ Alertas de tiempo por orden")
-
-tabla_alertas = df_filtrado[
-    [
-        "numero_rq", "numero_po", "numero_ea", "numero_factura",
-        "dias_rq_po", "alerta_rq_po",
-        "dias_po_ea", "alerta_po_ea",
-        "dias_ea_factura", "alerta_ea_factura",
-    ]
-].drop_duplicates(subset=["numero_rq", "numero_po", "numero_ea", "numero_factura"])
-
-st.dataframe(
-    tabla_alertas,
-    use_container_width=True,
-    hide_index=True,
-    column_config={
-        "numero_rq": "N° RQ",
-        "numero_po": "N° PO",
-        "numero_ea": "N° EA",
-        "numero_factura": "N° Factura",
-        "dias_rq_po": "Días RQ→PO",
-        "alerta_rq_po": "Alerta RQ→PO",
-        "dias_po_ea": "Días PO→EA",
-        "alerta_po_ea": "Alerta PO→EA",
-        "dias_ea_factura": "Días EA→Factura",
-        "alerta_ea_factura": "Alerta EA→Factura",
-    },
-)
-
-st.divider()
-
-# ==========================================
-# TABLA: Detalle completo
-# ==========================================
-
-st.subheader("📋 Detalle completo")
-
-tabla_detalle = df_filtrado[
-    [
-        "numero_rq", "fecha_rq", "descripcion_item", "cantidad_rq",
-        "requisitor", "bodega",
-        "numero_po", "fecha_po", "cantidad_po", "proveedor",
-        "numero_ea", "fecha_ea", "cantidad_ea",
-        "numero_factura", "fecha_factura", "factura_proveedor",
-        "alerta_diferencia_cantidad",
-    ]
-]
-
-st.dataframe(
-    tabla_detalle,
-    use_container_width=True,
-    hide_index=True,
-    column_config={
-        "numero_rq": "N° RQ",
-        "fecha_rq": st.column_config.DateColumn("Fecha RQ", format="DD/MM/YYYY"),
-        "descripcion_item": "Ítem",
-        "cantidad_rq": "Cant. RQ",
-        "requisitor": "Requisitor",
-        "bodega": "Bodega",
-        "numero_po": "N° PO",
-        "fecha_po": st.column_config.DateColumn("Fecha PO", format="DD/MM/YYYY"),
-        "cantidad_po": "Cant. PO",
-        "proveedor": "Proveedor",
-        "numero_ea": "N° EA",
-        "fecha_ea": st.column_config.DateColumn("Fecha EA", format="DD/MM/YYYY"),
-        "cantidad_ea": "Cant. EA",
-        "numero_factura": "N° Factura",
-        "fecha_factura": st.column_config.DateColumn("Fecha Factura", format="DD/MM/YYYY"),
-        "factura_proveedor": "Factura proveedor",
-        "alerta_diferencia_cantidad": "Alerta cantidad",
-    },
-)
-
-st.caption(f"{len(tabla_detalle):,} filas mostradas de {len(df):,} totales.")
-
-# ==========================================
-# EXPORTAR A EXCEL
-# ==========================================
-
-@st.cache_data
-def convertir_a_excel(dataframe):
-    import io
-    buffer = io.BytesIO()
-    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
-        dataframe.to_excel(writer, index=False, sheet_name="Seguimiento_RQ")
-    return buffer.getvalue()
-
-st.download_button(
-    "📊 Exportar esta vista a Excel",
-    data=convertir_a_excel(tabla_detalle),
-    file_name="seguimiento_rq_filtrado.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-)
-    "📊 Exportar esta vista a Excel",
-    data=convertir_a_excel(tabla_detalle),
-    file_name="seguimiento_rq_filtrado.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-)
