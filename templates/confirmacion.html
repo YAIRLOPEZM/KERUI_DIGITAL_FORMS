@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orden guardada - KERUI DIGITAL FORMS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+    <style>
+        body {
+            display: block;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+        .caja {
+            max-width: 520px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 15px rgba(0,0,0,.15);
+            text-align: center;
+        }
+        .caja h1 {
+            font-size: 20px;
+            color: #1a7a3a;
+        }
+        .caja p {
+            font-size: 14px;
+            color: #333;
+        }
+        .boton {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 12px 20px;
+            background: #0078D4;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .caja-link {
+            margin-top: 24px;
+            padding: 14px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            text-align: left;
+        }
+        .caja-link label {
+            font-size: 13px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 6px;
+        }
+        .caja-link input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px;
+            font-size: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .nota {
+            font-size: 12px;
+            color: #777;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="caja">
+
+        <h1>✅ Orden {{ numero_ot }} guardada</h1>
+
+        <p>El PDF preliminar ya se generó con la firma del técnico.</p>
+
+        <a class="boton" href="{{ pdf_link }}" target="_blank">Ver / descargar PDF</a>
+
+        <div class="caja-link">
+            <label>Enlace para que el Supervisor firme:</label>
+            <input type="text" readonly value="{{ link_supervisor }}" onclick="this.select()">
+            <p class="nota">Comparte este enlace por WhatsApp o correo con el supervisor. Cuando él firme, se habilitará automáticamente el enlace para el coordinador.</p>
+        </div>
+
+        <p style="margin-top: 24px;">
+            <a href="/">← Diligenciar otra orden</a>
+        </p>
+
+    </div>
+
+</body>
+</html>

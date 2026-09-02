@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>KERUI DIGITAL FORMS - Orden de Mantenimiento</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/estilos.css') }}">
+
+    <style>
+        {{ css_inline|safe }}
+    </style>
+
+    <style>
+
+        /* =========================================
+           CONFIGURACIÓN PDF
+        ========================================= */
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: white;
+        }
+
+        .pdf-document {
+            width: 100%;
+        }
+
+        /* =========================================
+           CAMPOS ESTÁTICOS DEL PDF
+        ========================================= */
+
+        .campo-pdf {
+            min-height: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 3px 5px;
+            text-align: left;
+            word-wrap: break-word;
+        }
+
+        .campo-pdf-centro {
+            min-height: 20px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 3px 5px;
+            text-align: center;
+        }
+
+        .espacio-pdf {
+            min-height: 22px;
+        }
+
+        .texto-vacio {
+            color: transparent;
+        }
+
+        /* =========================================
+           EVITAR CORTES EXTRAÑOS
+        ========================================= */
+
+        table {
+            page-break-inside: avoid;
+        }
+
+        tr {
+            page-break-inside: avoid;
+        }
+
+        .seccion {
+            page-break-after: avoid;
+        }
+
+        .recomendaciones {
+            page-break-inside: avoid;
+        }
+
+        /* =========================================
+           FIRMAS
+        ========================================= */
+
+        .zona-firma-pdf {
+            height: 95px;
+            position: relative;
+        }
+
+        .espacio-firma {
+            height: 65px;
+        }
+
+        .linea-firma-pdf {
+            border: 0;
+            border-top: 1px solid #000;
+            margin: 0 auto 5px auto;
+            width: 90%;
+        }
+
+        .titulo-firma-pdf {
+            text-align: center;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        .fecha-firma-pdf {
+            font-size: 9px;
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* =========================================
+           IMPRESIÓN
+        ========================================= */
+
+        @media print {
+
+            body {
+                background: white;
+            }
+
+            .pdf-document {
+                width: 100%;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="pdf-document">
+
+
+<!-- =====================================================
+     ENCABEZADO
+===================================================== -->
+
+<div class="encabezado">
+
+    <div class="logo">
+
+        <img
+            src="data:image/png;base64,{{ logo_base64 }}"
+            alt="KERUI">
+
+    </div>
+
+    <div class="titulo">
+
+        ORDEN DE MANTENIMIENTO
+
+    </div>
+
+    <div class="datos">
+
+        <div class="celda">
+            <strong>Código</strong>
+        </div>
+
+        <div class="celda">
+            K5-F-05
+        </div>
+
+        <div class="celda">
+            <strong>Fecha</strong>
+        </div>
+
+        <div class="celda">
+            10/11/2021
+        </div>
+
+        <div class="celda">
+            <strong>Versión</strong>
+        </div>
+
+        <div class="celda">
+            3
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =====================================================
+     SECCIÓN 1
+===================================================== -->
+
+<div class="seccion">
+
+    1. INFORMACIÓN GENERAL
+
+</div>
+
+
+<table class="tabla-info">
+
+<tr>
+
+    <td rowspan="2" class="gris etiqueta">
+
+        Descripción de la Orden De Trabajo:
+
+    </td>
+
+    <td rowspan="2" class="col-descripcion">
+
+        <div class="campo-pdf espacio-pdf">
+            {{ descripcion_orden }}
+        </div>
+
+    </td>
+
+    <td class="gris etiqueta">
+
+        Nº de Orden de Trabajo:
+
+    </td>
+
+    <td class="col-orden">
+
+        <div class="campo numero-ot">
+
+            {{ numero_ot }}
+
+        </div>
+
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td class="gris etiqueta">
+
+        Tipo De Orden De Trabajo:
+
+    </td>
+
+    <td class="col-prioridad">
+
+        <div class="campo-pdf">
+
+            {{ tipo_orden }}
+
+        </div>
+
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td rowspan="3" class="gris etiqueta centro">
+
+        Operación
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ operacion1 }}
+        </div>
+
+    </td>
+
+    <td class="gris etiqueta centro">
+
+        Frecuencia
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ frecuencia1 }}
+        </div>
+
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td>
+        <div class="campo-pdf">
+            {{ operacion2 }}
+        </div>
+    </td>
+
+    <td class="gris etiqueta centro">
+        Frecuencia
+    </td>
+
+    <td>
+        <div class="campo-pdf">
+            {{ frecuencia2 }}
+        </div>
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td>
+        <div class="campo-pdf">
+            {{ operacion3 }}
+        </div>
+    </td>
+
+    <td class="gris etiqueta centro">
+        Frecuencia
+    </td>
+
+    <td>
+        <div class="campo-pdf">
+            {{ frecuencia3 }}
+        </div>
+    </td>
+
+</tr>
+
+        <div class="campo-pdf"></div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+<!-- =====================================================
+     RECOMENDACIONES
+===================================================== -->
+
+<div class="recomendaciones">
+
+<strong>
+
+    ANTES DE INICIAR CUALQUIER LABOR TENER EN CUENTA LAS SIGUIENTES RECOMENDACIONES:
+
+</strong>
+
+<ul>
+
+    <li>
+
+        DILIGENCIAR DEBIDAMENTE LOS PERMISOS DE TRABAJO JUNTO CON SU ATS PARA LA ACTIVIDAD A EJECUTAR.
+
+    </li>
+
+    <li>
+
+        PERMISO DE TRABAJO #
+
+        <span class="campo-pdf">{{ permiso_trabajo }}</span>
+
+    </li>
+
+    <li>
+
+        UTILICE LOS ELEMENTOS DE PROTECCIÓN PERSONAL NECESARIOS DE ACUERDO A ESTA ACTIVIDAD,
+        GUANTES, CASCO, BOTAS, GAFAS, OVEROL.
+
+    </li>
+
+    <li>
+
+        ANTES DE EJECUTAR CUALQUIER ACTIVIDAD EN EL EQUIPO ASEGÚRESE DE BLOQUEAR Y ETIQUETAR EL MISMO,
+        ASÍ COMO DESENERGIZAR.
+
+    </li>
+
+    <li>
+
+        CUALQUIER FUENTE DE PODER, SEA MECÁNICA, ELÉCTRICA, HIDRÁULICA O NEUMÁTICA.
+
+    </li>
+
+</ul>
+
+</div>
+
+
+<!-- =====================================================
+     DATOS DEL TRABAJO
+===================================================== -->
+
+<table class="tabla-datos">
+
+<tr>
+
+    <td class="titulo-celda">
+
+        Fecha Inicio:
+
+    </td>
+
+    <td class="col-fecha">
+
+        <div class="campo-pdf">
+
+            {{ fecha }}
+
+        </div>
+
+    </td>
+
+    <td class="titulo-celda">
+
+        Hora Inicio:
+
+    </td>
+
+    <td class="col-hora">
+
+        <div class="campo-pdf">
+
+            {{ hora_inicio }}
+
+        </div>
+
+    </td>
+
+    <td class="titulo-celda">
+
+        Horómetro:
+
+    </td>
+
+    <td class="col-horometro">
+
+        <div class="campo-pdf">
+
+            {{ horometro }}
+
+        </div>
+
+    </td>
+
+    <td class="titulo-celda">
+
+        Prioridad:
+
+    </td>
+
+    <td class="col-prioridad">
+
+        <div class="campo-pdf">
+            {{ prioridad }}
+        </div>
+
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td class="titulo-celda">
+
+        Fecha de finalización:
+
+    </td>
+
+    <td class="col-fecha">
+
+        <div class="campo-pdf">
+            {{ fecha_finalizacion }}
+        </div>
+
+    </td>
+
+    <td class="titulo-celda">
+
+        Hora final:
+
+    </td>
+
+    <td class="col-hora">
+
+        <div class="campo-pdf">
+            {{ hora_final }}
+        </div>
+
+    </td>
+
+    <td class="titulo-celda">
+
+        Especialidad:
+
+    </td>
+
+    <td colspan="3" class="col-especialidad">
+
+        <div class="campo-pdf">
+            {{ especialidad }}
+        </div>
+
+    </td>
+
+</tr>
+
+
+<!-- ========================================== -->
+<!-- INFORMACIÓN DEL EQUIPO -->
+<!-- ========================================== -->
+
+<table class="tabla-equipo">
+
+    <!-- FILA DE TÍTULOS -->
+    <tr>
+
+        <td class="titulo-equipo col-ubicacion">
+            Ubicación Técnica
+        </td>
+
+        <td class="titulo-equipo col-equipo">
+            Descripción del equipo
+        </td>
+
+        <td class="titulo-equipo col-sap">
+            Núm. Equipo SAP
+        </td>
+
+        <td class="titulo-equipo col-serie">
+            Número Serie
+        </td>
+
+    </tr>
+
+
+    <!-- FILA DE DATOS -->
+    <tr>
+
+        <td class="col-ubicacion">
+
+            <div class="campo-pdf">
+                {{ ubicacion }}
+            </div>
+
+        </td>
+
+        <td class="col-equipo">
+
+            <div class="campo-pdf">
+                {{ equipo }}
+            </div>
+
+        </td>
+
+        <td class="col-sap">
+
+            <div class="campo-pdf">
+                {{ sap }}
+            </div>
+
+        </td>
+
+        <td class="col-serie">
+
+            <div class="campo-pdf">
+                {{ numero_serie }}
+            </div>
+
+        </td>
+
+    </tr>
+
+</table>
+
+<!-- =====================================================
+     SECCIÓN 2
+===================================================== -->
+
+<div class="seccion">
+
+    2. REPORTE TÉCNICO
+
+</div>
+
+
+<table class="tabla-reporte">
+
+<tr>
+
+    <td class="titulo-reporte">
+
+        ¿Qué actividad realizó al equipo?
+
+    </td>
+
+</tr>
+
+<tr>
+
+    <td>
+
+        <div class="campo-pdf espacio-pdf">{{ actividad_realizada }}</div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+<table class="tabla-reporte">
+
+<tr>
+
+    <td class="titulo-reporte">
+
+        ¿Cómo quedó el equipo?
+
+    </td>
+
+</tr>
+
+<tr>
+
+    <td>
+
+        <div class="campo-pdf espacio-pdf">{{ como_quedo }}</div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+<table class="tabla-reporte">
+
+<tr>
+
+    <td class="titulo-reporte">
+
+        Recomendaciones y Pendientes
+
+    </td>
+
+</tr>
+
+<tr>
+
+    <td>
+
+        <div class="campo-pdf espacio-pdf">{{ recomendaciones }}</div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+<!-- =====================================================
+     SECCIÓN 3
+===================================================== -->
+
+<div class="seccion">
+
+    3. INFORME DE FALLA
+
+</div>
+
+
+<table class="tabla-falla">
+
+<tr>
+
+    <td class="titulo-falla col-falla">
+
+        Parte que falló (Modo de Falla)
+
+    </td>
+
+    <td class="titulo-falla col-causa">
+
+        Causa probable de falla
+
+    </td>
+
+    <td class="titulo-falla col-parada">
+
+        Parada
+
+    </td>
+
+    <td class="titulo-falla col-fuera">
+
+        Tiempo fuera de servicio
+
+    </td>
+
+    <td class="titulo-falla col-reparacion">
+
+        Tiempo de reparación
+
+    </td>
+
+</tr>
+
+
+<tr>
+
+    <td class="col-falla">
+
+        <div class="campo-pdf">{{ parte_fallo }}</div>
+
+    </td>
+
+    <td class="col-causa">
+
+        <div class="campo-pdf">{{ causa_falla }}</div>
+
+    </td>
+
+    <td class="col-parada parada">
+
+        <div class="campo-pdf-centro">{{ parada }}</div>
+
+    </td>
+
+    <td class="col-fuera">
+
+        <div class="campo-pdf">{{ tiempo_fuera }}</div>
+
+    </td>
+
+    <td class="col-reparacion">
+
+        <div class="campo-pdf">{{ tiempo_reparacion }}</div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+<!-- =====================================================
+     SECCIÓN 4
+===================================================== -->
+
+<div class="seccion">
+
+    4. REPUESTOS UTILIZADOS
+
+</div>
+
+
+<table class="tabla-repuesto">
+
+<tr>
+
+    <td class="titulo-repuesto col-item">
+        Ítem
+    </td>
+
+    <td class="titulo-repuesto col-repuesto">
+        Descripción del repuesto
+    </td>
+
+    <td class="titulo-repuesto col-parte">
+        Parte Número
+    </td>
+
+    <td class="titulo-repuesto col-cantidad">
+        Cantidad
+    </td>
+
+</tr>
+
+
+{% for r in repuestos %}
+<tr>
+
+    <td><div class="campo-pdf">{{ r.item }}</div></td>
+    <td><div class="campo-pdf">{{ r.descripcion }}</div></td>
+    <td><div class="campo-pdf">{{ r.parte }}</div></td>
+    <td><div class="campo-pdf">{{ r.cantidad }}</div></td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+
+<!-- =====================================================
+     SECCIÓN 5
+===================================================== -->
+
+<div class="seccion">
+
+    5. NOMBRES Y TIEMPOS DEL PERSONAL TÉCNICO QUE EJECUTA LA ACTIVIDAD
+
+</div>
+
+
+<table class="tabla-personal">
+
+<tr>
+
+    <td class="titulo-personal col-nombre">
+        Nombre
+    </td>
+
+    <td class="titulo-personal col-apellido">
+        Apellidos
+    </td>
+
+    <td class="titulo-personal col-fecha-trabajo">
+        Fecha de Trabajo
+    </td>
+
+    <td class="titulo-personal col-horas">
+        Horas trabajadas
+    </td>
+
+    <td class="titulo-personal col-extras">
+        Horas Extras
+    </td>
+
+</tr>
+
+
+{% for t in tecnicos %}
+<tr>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ t.nombre }}
+        </div>
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ t.apellidos }}
+        </div>
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ t.fecha }}
+        </div>
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ t.horas }}
+        </div>
+
+    </td>
+
+    <td>
+
+        <div class="campo-pdf">
+            {{ t.extra }}
+        </div>
+
+    </td>
+
+</tr>
+{% endfor %}
+
+</table>
+
+
+<!-- =====================================================
+     SECCIÓN 6
+===================================================== -->
+
+<div class="seccion">
+
+    6. VALIDACIONES
+
+</div>
+
+
+<table class="tabla-validacion">
+
+<tr>
+
+    <td>
+
+        <div class="zona-firma-pdf">
+
+            <div class="espacio-firma">
+                {% if firma_tecnico %}
+                <img src="{{ firma_tecnico }}" alt="Firma técnico" style="max-height: 60px; max-width: 100%;">
+                {% endif %}
+            </div>
+
+            <hr class="linea-firma-pdf">
+
+            <div class="titulo-firma-pdf">
+
+                Nombre y/o Firma Técnico Ejecutante
+
+            </div>
+
+        </div>
+
+        <div class="fecha-firma-pdf">
+
+            Fecha: {{ fecha_firma_tecnico }}
+
+        </div>
+
+    </td>
+
+
+    <td>
+
+        <div class="zona-firma-pdf">
+
+            <div class="espacio-firma">
+                {% if firma_supervisor %}
+                <img src="{{ firma_supervisor }}" alt="Firma supervisor" style="max-height: 60px; max-width: 100%;">
+                {% endif %}
+            </div>
+
+            <hr class="linea-firma-pdf">
+
+            <div class="titulo-firma-pdf">
+
+                Nombre y/o Firma del Supervisor / Ing. Mtto
+
+            </div>
+
+        </div>
+
+        <div class="fecha-firma-pdf">
+
+            Fecha: {{ fecha_firma_supervisor }}
+
+        </div>
+
+    </td>
+
+
+    <td>
+
+        <div class="zona-firma-pdf">
+
+            <div class="espacio-firma">
+                {% if firma_coordinador %}
+                <img src="{{ firma_coordinador }}" alt="Firma coordinador" style="max-height: 60px; max-width: 100%;">
+                {% endif %}
+            </div>
+
+            <hr class="linea-firma-pdf">
+
+            <div class="titulo-firma-pdf">
+
+                Nombre y/o Firma Coordinador Operaciones
+
+            </div>
+
+        </div>
+
+        <div class="fecha-firma-pdf">
+
+            Fecha: {{ fecha_firma_coordinador }}
+
+        </div>
+
+    </td>
+
+</tr>
+
+</table>
+
+
+</div>
+
+</body>
+
+</html>

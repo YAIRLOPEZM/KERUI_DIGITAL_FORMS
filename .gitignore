@@ -1,9 +1,12 @@
 __pycache__/
-
 *.pyc
-
 uploads/
-
 venv/
-
 .env
+
+# Datos reales/sensibles — nunca deben subirse a GitHub
+firmas/
+pdf/
+database
+*.db
+KERUI_DIGITAL_FORMS/
