@@ -1,2 +1,6 @@
 Flask
 gunicorn
+playwright
+requests
+psycopg2-binary
+openpyxl
