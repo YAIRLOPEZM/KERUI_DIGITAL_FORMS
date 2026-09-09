@@ -26,6 +26,7 @@ from models import (
 )
 
 app = Flask(__name__)
+app.secret_key = os.environ.get("SECRET_KEY", "supervisormtto")
 
 crear_base_datos()
 
