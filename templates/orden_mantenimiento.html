@@ -39,6 +39,9 @@
             <div class="titulo">
 
                 ORDEN DE MANTENIMIENTO
+                {% if modo == "editar" %}
+                    <span style="font-size: 0.6em; color: #b00;">(EDITANDO — las firmas no se modifican aquí)</span>
+                {% endif %}
 
             </div>
 
@@ -93,7 +96,7 @@
         </td>
 
         <td rowspan="2" class="col-descripcion">
-            <textarea name="descripcion_orden"></textarea>
+            <textarea name="descripcion_orden">{{ orden.descripcion_orden if modo == "editar" and orden else "" }}</textarea>
         </td>
 
         <td class="gris etiqueta">
@@ -124,11 +127,11 @@
                 <select class="campo" name="tipo_orden">
 
                     <option></option>
-                    <option>PREVENTIVO</option>
-                    <option>PREDICTIVO</option>
-                    <option>CORRECTIVO</option>
-                    <option>MODIFICACIÓN</option>
-                    <option>OTROS...</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.tipo_orden == "PREVENTIVO" }}>PREVENTIVO</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.tipo_orden == "PREDICTIVO" }}>PREDICTIVO</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.tipo_orden == "CORRECTIVO" }}>CORRECTIVO</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.tipo_orden == "MODIFICACIÓN" }}>MODIFICACIÓN</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.tipo_orden == "OTROS..." }}>OTROS...</option>
 
                 </select>
 
@@ -146,7 +149,8 @@
             <input
                 type="text"
                 class="campo"
-                name="operacion1">
+                name="operacion1"
+                value="{{ orden.operacion1 if modo == "editar" and orden else "" }}">
         </td>
 
         <td class="gris etiqueta centro">
@@ -155,24 +159,13 @@
         
         <td class="col-prioridad">
 
+                {% set opciones_frecuencia = ["100HR","300HR","400HR","1000HR","1500HR","2000HR","3000HR","4000HR","8000HR","12000HR","OVERHAUL"] %}
                 <select class="campo" name="frecuencia1">
 
                     <option></option>
-                    <option>100HR</option>
-                    <option>300HR</option>
-                    <option>400HR</option>
-                    <option>1000HR</option>
-                    <option>1500HR</option>
-                    <option>2000HR</option>
-                    <option>3000HR</option>
-                    <option>4000HR</option>
-                    <option>8000HR</option>
-                    <option>12000HR</option>
-                    <option>OVERHAUL</option>
-
-
-
-                    .....
+                    {% for op in opciones_frecuencia %}
+                    <option {{ "selected" if modo == "editar" and orden and orden.frecuencia1 == op }}>{{ op }}</option>
+                    {% endfor %}
                 </select>
 
             </td>
@@ -184,7 +177,8 @@
             <input
                 type="text"
                 class="campo"
-                name="operacion2">
+                name="operacion2"
+                value="{{ orden.operacion2 if modo == "editar" and orden else "" }}">
         </td>
 
         <td class="gris etiqueta centro">
@@ -196,18 +190,9 @@
                 <select class="campo" name="frecuencia2">
 
                     <option></option>
-                    <option>100HR</option>
-                    <option>300HR</option>
-                    <option>400HR</option>
-                    <option>1000HR</option>
-                    <option>1500HR</option>
-                    <option>2000HR</option>
-                    <option>3000HR</option>
-                    <option>4000HR</option>
-                    <option>8000HR</option>
-                    <option>12000HR</option>
-                    <option>OVERHAUL</option>
-
+                    {% for op in opciones_frecuencia %}
+                    <option {{ "selected" if modo == "editar" and orden and orden.frecuencia2 == op }}>{{ op }}</option>
+                    {% endfor %}
                 </select>
 
             </td>
@@ -219,7 +204,8 @@
             <input
                 type="text"
                 class="campo"
-                name="operacion3">
+                name="operacion3"
+                value="{{ orden.operacion3 if modo == "editar" and orden else "" }}">
         </td>
 
         <td class="gris etiqueta centro">
@@ -231,18 +217,9 @@
                 <select class="campo" name="frecuencia3">
 
                     <option></option>
-                    <option>100HR</option>
-                    <option>300HR</option>
-                    <option>400HR</option>
-                    <option>1000HR</option>
-                    <option>1500HR</option>
-                    <option>2000HR</option>
-                    <option>3000HR</option>
-                    <option>4000HR</option>
-                    <option>8000HR</option>
-                    <option>12000HR</option>
-                    <option>OVERHAUL</option>
-
+                    {% for op in opciones_frecuencia %}
+                    <option {{ "selected" if modo == "editar" and orden and orden.frecuencia3 == op }}>{{ op }}</option>
+                    {% endfor %}
                 </select>
 
             </td>
@@ -269,7 +246,8 @@
                 type="text"
                 class="permiso"
                 name="permiso_trabajo"
-                placeholder="Número del permiso">
+                placeholder="Número del permiso"
+                value="{{ orden.permiso_trabajo if modo == "editar" and orden else "" }}">
         </li>
 
         <li>
@@ -302,7 +280,7 @@
             </td>
 
             <td class="col-fecha">
-                <input type="date" class="campo" name="fecha">
+                <input type="date" class="campo" name="fecha" value="{{ orden.fecha if modo == "editar" and orden else "" }}">
             </td>
 
             <td class="titulo-celda">
@@ -310,7 +288,7 @@
             </td>
 
             <td class="col-hora">
-                <input type="time" class="campo" name="hora_inicio">
+                <input type="time" class="campo" name="hora_inicio" value="{{ orden.hora_inicio if modo == "editar" and orden else "" }}">
             </td>
 
             <td class="titulo-celda">
@@ -321,7 +299,8 @@
                 <input
                     type="number"
                     class="campo"
-                    name="horometro">
+                    name="horometro"
+                    value="{{ orden.horometro if modo == "editar" and orden else "" }}">
             </td>
             <td class="titulo-celda">
                 Prioridad:
@@ -332,9 +311,9 @@
                 <select class="campo" name="prioridad">
 
                     <option></option>
-                    <option>ALTA</option>
-                    <option>MEDIA</option>
-                    <option>BAJA</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.prioridad == "ALTA" }}>ALTA</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.prioridad == "MEDIA" }}>MEDIA</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.prioridad == "BAJA" }}>BAJA</option>
 
                 </select>
 
@@ -346,7 +325,7 @@
             </td>
 
             <td class="col-fecha">
-                <input type="date" class="campo" name="fecha_finalizacion">
+                <input type="date" class="campo" name="fecha_finalizacion" value="{{ orden.fecha_finalizacion if modo == "editar" and orden else "" }}">
             </td>
 
             <td class="titulo-celda">
@@ -354,7 +333,7 @@
             </td>
 
              <td class="col-hora">
-                <input type="time" class="campo" name="hora_final">
+                <input type="time" class="campo" name="hora_final" value="{{ orden.hora_final if modo == "editar" and orden else "" }}">
             </td>
 
             <td class="titulo-celda">
@@ -364,9 +343,9 @@
 
                 <select class="campo" name="especialidad">
 
-                    <option>ELECTRICO</option>
-                    <option>INSTRUMENTACIÓN</option>
-                    <option>MÉCANICO</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.especialidad == "ELECTRICO" }}>ELECTRICO</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.especialidad == "INSTRUMENTACIÓN" }}>INSTRUMENTACIÓN</option>
+                    <option {{ "selected" if modo == "editar" and orden and orden.especialidad == "MÉCANICO" }}>MÉCANICO</option>
 
                 </select>
 
@@ -407,26 +386,13 @@
 
         <td class="col-ubicacion">
 
+            {% set opciones_ubicacion = ["900-6 G","900-6 C","900-8 G","900-8 C","900-12 G","900-12 C","900-13 G","900-13 C","1200-7 G","1200-7 C","1200-9 G","1200-9 C","1200-3 G","1200-3 C","1200-3 T","N/A"] %}
             <select class="campo" name="ubicacion">
 
                 <option value=""></option>
-
-                <option>900-6 G</option>
-                <option>900-6 C</option>
-                <option>900-8 G</option>
-                <option>900-8 C</option>
-                <option>900-12 G</option>
-                <option>900-12 C</option>
-                <option>900-13 G</option>
-                <option>900-13 C</option>
-                <option>1200-7 G</option>
-                <option>1200-7 C</option>
-                <option>1200-9 G</option>
-                <option>1200-9 C</option>
-                <option>1200-3 G</option>
-                <option>1200-3 C</option>
-                <option>1200-3 T</option>
-                <option>N/A</option>
+                {% for op in opciones_ubicacion %}
+                <option {{ "selected" if modo == "editar" and orden and orden.ubicacion == op }}>{{ op }}</option>
+                {% endfor %}
 
             </select>
 
@@ -434,34 +400,25 @@
 
         <td class="col-equipo">
 
-            <input type="text" class="campo" name="equipo">
+            <input type="text" class="campo" name="equipo" value="{{ orden.equipo if modo == "editar" and orden else "" }}">
 
         </td>
 
         <td class="col-sap">
 
-
+            <!--
+                Confirmado con inicio(): datos["equipo_sap"] = form.get("sap"),
+                por eso el <select> se llama "sap" pero se compara contra
+                orden.equipo_sap aquí abajo.
+            -->
+            {% set opciones_sap = ["YF 026","YF 027","YF 030","YF 031","YF 038","YF 039","YF 040","YF 041","YF 060","YF 061","YF 144","YF 145","YF 912","YF 913","N/A"] %}
             <select class="campo" name="sap">
 
                 <option value=""></option>
-                <option>YF 026</option>
-                <option>YF 027</option>
-                <option>YF 030</option>
-                <option>YF 031</option>
-                <option>YF 038</option>
-                <option>YF 039</option>
-                <option>YF 040</option>
-                <option>YF 041</option>
-                <option>YF 060</option>
-                <option>YF 061</option>
-                <option>YF 144</option>
-                <option>YF 145</option>
-                <option>YF 144</option>
-                <option>YF 912</option>
-                <option>YF 913</option>
-                <option>N/A</option>
+                {% for op in opciones_sap %}
+                <option {{ "selected" if modo == "editar" and orden and orden.equipo_sap == op }}>{{ op }}</option>
+                {% endfor %}
 
-               
             </select>
 
                 
@@ -469,27 +426,19 @@
 
         <td class="col-serie">
 
+            <!--
+                Confirmado con inicio(): datos["numero_serie"] = form.get("serie"),
+                por eso el <select> se llama "serie" pero se compara contra
+                orden.numero_serie aquí abajo.
+            -->
+            {% set opciones_serie = ["S 46212","S 46211","ISW 482","ISW 480","WCT 966","WCT 965","NTQ 294","NTQ 295","ISW 483","ISW 481","WCT 947","WCT 949","T 5792","T 5793","T 5794","N/A"] %}
             <select class="campo" name="serie">
 
                 <option value=""></option>
-                <option>S 46212</option>
-                <option>S 46211</option>
-                <option>ISW 482</option>
-                <option>ISW 480</option>
-                <option>WCT 966</option>
-                <option>WCT 965</option>
-                <option>NTQ 294</option>
-                <option>NTQ 295</option>
-                <option>ISW 483</option>
-                <option>ISW 481</option>
-                <option>WCT 947</option>
-                <option>WCT 949</option>
-                <option>T 5792</option>
-                <option>T 5793</option>
-                <option>T 5794</option>
-                <option>N/A</option>
+                {% for op in opciones_serie %}
+                <option {{ "selected" if modo == "editar" and orden and orden.numero_serie == op }}>{{ op }}</option>
+                {% endfor %}
 
-               
             </select>
 
         </td>
@@ -527,7 +476,7 @@
 
         <td>
 
-            <textarea class="reporte-corto" name="actividad_realizada"></textarea>
+            <textarea class="reporte-corto" name="actividad_realizada">{{ orden.actividad_realizada if modo == "editar" and orden else "" }}</textarea>
 
         </td>
 
@@ -549,7 +498,7 @@
 
         <td>
 
-            <textarea class="reporte-tecnico" name="como_quedo"></textarea>
+            <textarea class="reporte-tecnico" name="como_quedo">{{ orden.como_quedo if modo == "editar" and orden else "" }}</textarea>
 
         </td>
 
@@ -571,7 +520,7 @@
 
         <td>
 
-            <textarea class="reporte-tecnico" name="recomendaciones"></textarea>
+            <textarea class="reporte-tecnico" name="recomendaciones">{{ orden.recomendaciones if modo == "editar" and orden else "" }}</textarea>
 
         </td>
 
@@ -619,25 +568,25 @@
 
         <td class="col-falla">
 
-            <input type="text" class="campo" name="parte_fallo">
+            <input type="text" class="campo" name="parte_fallo" value="{{ orden.parte_fallo if modo == "editar" and orden else "" }}">
 
         </td>
 
         <td class="col-causa">
 
-            <input type="text" class="campo" name="causa_falla">
+            <input type="text" class="campo" name="causa_falla" value="{{ orden.causa_falla if modo == "editar" and orden else "" }}">
 
         </td>
 
         <td class="col-parada parada">
 
         <label>
-            <input type="radio" name="parada" value="Sí">
+            <input type="radio" name="parada" value="Sí" {{ "checked" if modo == "editar" and orden and orden.parada == "Sí" }}>
             Sí
         </label>
 
         <label>
-            <input type="radio" name="parada" value="No">
+            <input type="radio" name="parada" value="No" {{ "checked" if modo == "editar" and orden and orden.parada == "No" }}>
             No
         </label>
         
@@ -646,13 +595,13 @@
 
         <td class="col-fuera">
 
-            <input type="text" class="campo" name="tiempo_fuera">
+            <input type="text" class="campo" name="tiempo_fuera" value="{{ orden.tiempo_fuera if modo == "editar" and orden else "" }}">
 
         </td>
 
         <td class="col-reparacion">
 
-            <input type="text" class="campo" name="tiempo_reparacion">
+            <input type="text" class="campo" name="tiempo_reparacion" value="{{ orden.tiempo_reparacion if modo == "editar" and orden else "" }}">
 
         </td>
 
@@ -668,6 +617,13 @@
             4. REPUESTOS UTILIZADOS
 
         </div>
+
+        <!--
+            Confirmado con guardar_orden()/inicio(): orden.repuestos es
+            siempre una lista de 5 diccionarios con claves
+            item/descripcion/parte/cantidad (una por cada repuestoN_*
+            del formulario), así que se puede indexar directo 0..4.
+        -->
     
     <table class="tabla-repuesto">
 
@@ -693,41 +649,15 @@
 
     </tr>
 
-        <!-- PRIMERA FILA DE DATOS -->
+        {% for i in range(1, 6) %}
+        {% set r = orden.repuestos[i - 1] if modo == "editar" and orden and orden.repuestos else None %}
         <tr>
-        <td><input type="text" class="campo" name="repuesto1_item"></td>
-        <td><input type="text" class="campo" name="repuesto1_descripcion"></td>
-        <td><input type="text" class="campo" name="repuesto1_parte"></td>
-        <td><input type="number" class="campo" name="repuesto1_cantidad"></td>
+        <td><input type="text" class="campo" name="repuesto{{ i }}_item" value="{{ r.item if r else '' }}"></td>
+        <td><input type="text" class="campo" name="repuesto{{ i }}_descripcion" value="{{ r.descripcion if r else '' }}"></td>
+        <td><input type="text" class="campo" name="repuesto{{ i }}_parte" value="{{ r.parte if r else '' }}"></td>
+        <td><input type="number" class="campo" name="repuesto{{ i }}_cantidad" value="{{ r.cantidad if r else '' }}"></td>
     </tr>
-
-    <tr>
-        <td><input type="text" class="campo" name="repuesto2_item"></td>
-        <td><input type="text" class="campo" name="repuesto2_descripcion"></td>
-        <td><input type="text" class="campo" name="repuesto2_parte"></td>
-        <td><input type="number" class="campo" name="repuesto2_cantidad"></td>
-    </tr>
-
-    <tr>
-        <td><input type="text" class="campo" name="repuesto3_item"></td>
-        <td><input type="text" class="campo" name="repuesto3_descripcion"></td>
-        <td><input type="text" class="campo" name="repuesto3_parte"></td>
-        <td><input type="number" class="campo" name="repuesto3_cantidad"></td>
-    </tr>
-
-    <tr>
-        <td><input type="text" class="campo" name="repuesto4_item"></td>
-        <td><input type="text" class="campo" name="repuesto4_descripcion"></td>
-        <td><input type="text" class="campo" name="repuesto4_parte"></td>
-        <td><input type="number" class="campo" name="repuesto4_cantidad"></td>
-    </tr>
-
-    <tr>
-        <td><input type="text" class="campo" name="repuesto5_item"></td>
-        <td><input type="text" class="campo" name="repuesto5_descripcion"></td>
-        <td><input type="text" class="campo" name="repuesto5_parte"></td>
-        <td><input type="number" class="campo" name="repuesto5_cantidad"></td>
-    </tr>
+        {% endfor %}
 
     </table>
 
@@ -741,6 +671,15 @@
         5. NOMBRES Y TIEMPOS DEL PERSONAL TÉCNICO QUE EJECUTA LA ACTIVIDAD
 
     </div>
+
+    <!--
+        La primera fila (tecnico_nombre/tecnico_apellidos/tecnico1_*) SÍ
+        se puede prellenar con confianza: coincide 1 a 1 con las
+        columnas "nombre"/"apellidos" que ya vi en el Excel exportado.
+        Las filas 2 a 4 (técnicos adicionales) tienen el mismo problema
+        que "repuestos": se guardan como lista "tecnicos" y necesito
+        guardar_orden() para saber las claves exactas del diccionario.
+    -->
 
     <table class="tabla-personal">
 
@@ -775,6 +714,7 @@
             type="text"
             class="campo"
             name="tecnico_nombre"
+            value="{{ orden.nombre if modo == "editar" and orden else "" }}"
             required>
     </td>
 
@@ -783,6 +723,7 @@
             type="text"
             class="campo"
             name="tecnico_apellidos"
+            value="{{ orden.apellidos if modo == "editar" and orden else "" }}"
             required>
     </td>
 
@@ -791,6 +732,7 @@
             type="date"
             class="campo"
             name="tecnico1_fecha"
+            value="{{ orden.tecnico1_fecha if modo == "editar" and orden else "" }}"
             required>
     </td>
 
@@ -798,133 +740,71 @@
         <input
             type="number"
             class="campo"
-            name="tecnico1_horas">
+            name="tecnico1_horas"
+            value="{{ orden.tecnico1_horas if modo == "editar" and orden else "" }}">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="tecnico1_extra">
+            name="tecnico1_extra"
+            value="{{ orden.tecnico1_extra if modo == "editar" and orden else "" }}">
     </td>
 
 </tr>
 
+        <!--
+            Confirmado con inicio(): orden.tecnicos[0] es el técnico
+            principal (mismos datos que nombre/apellidos arriba);
+            orden.tecnicos[1..3] son los técnicos adicionales 2, 3 y 4.
+        -->
+        {% for i in range(2, 5) %}
+        {% set t = orden.tecnicos[i - 1] if modo == "editar" and orden and orden.tecnicos and orden.tecnicos|length > i - 1 else None %}
         <tr>
 
     <td>
         <input
             type="text"
             class="campo"
-            name="tecnico_nombre2">
+            name="tecnico_nombre{{ i }}"
+            value="{{ t.nombre if t else '' }}">
     </td>
 
     <td>
         <input
             type="text"
             class="campo"
-            name="tecnico_apellidos2">
+            name="tecnico_apellidos{{ i }}"
+            value="{{ t.apellidos if t else '' }}">
     </td>
 
     <td>
         <input
             type="date"
             class="campo"
-            name="tecnico2_fecha">
+            name="tecnico{{ i }}_fecha"
+            value="{{ t.fecha if t else '' }}">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="tecnico2_horas">
+            name="tecnico{{ i }}_horas"
+            value="{{ t.horas if t else '' }}">
     </td>
 
     <td>
         <input
             type="number"
             class="campo"
-            name="tecnico2_extra">
+            name="tecnico{{ i }}_extra"
+            value="{{ t.extra if t else '' }}">
     </td>
 
 </tr>
-        <tr>
-
-    <td>
-        <input
-            type="text"
-            class="campo"
-            name="tecnico_nombre3">
-    </td>
-
-    <td>
-        <input
-            type="text"
-            class="campo"
-            name="tecnico_apellidos3">
-    </td>
-
-    <td>
-        <input
-            type="date"
-            class="campo"
-            name="tecnico3_fecha">
-    </td>
-
-    <td>
-        <input
-            type="number"
-            class="campo"
-            name="tecnico3_horas">
-    </td>
-
-    <td>
-        <input
-            type="number"
-            class="campo"
-            name="tecnico3_extra">
-    </td>
-
-</tr>
-
-        <tr>
-
-    <td>
-        <input
-            type="text"
-            class="campo"
-            name="tecnico_nombre4">
-    </td>
-
-    <td>
-        <input
-            type="text"
-            class="campo"
-            name="tecnico_apellidos4">
-    </td>
-
-    <td>
-        <input
-            type="date"
-            class="campo"
-            name="tecnico4_fecha">
-    </td>
-
-    <td>
-        <input
-            type="number"
-            class="campo"
-            name="tecnico4_horas">
-    </td>
-
-    <td>
-        <input
-            type="number"
-            class="campo"
-            name="tecnico4_extra">
-    </td>
-
-</tr>
+        {% endfor %}
      
     </table>   
 
@@ -944,7 +824,7 @@
 
 <tr>
 
-    <td>
+    <td {{ 'style="opacity:0.5;pointer-events:none;"' if modo == "editar" }}>
 
         <canvas
             id="firmaTecnico"
@@ -971,9 +851,24 @@
 
         </button>
 
+        <button
+            type="button"
+            id="subirFirmaTecnico"
+            class="btn-limpiar">
+
+        🖼️
+
+        </button>
+
+        <input
+            type="file"
+            id="archivoFirmaTecnico"
+            accept="image/*"
+            style="display:none;">
+
     </td>
 
-    <td>
+    <td {{ 'style="opacity:0.5;pointer-events:none;"' if modo == "editar" }}>
 
         <canvas
             id="firmaSupervisor"
@@ -1000,9 +895,24 @@
 
         </button>
 
+        <button
+            type="button"
+            id="subirFirmaSupervisor"
+            class="btn-limpiar">
+
+        🖼️
+
+        </button>
+
+        <input
+            type="file"
+            id="archivoFirmaSupervisor"
+            accept="image/*"
+            style="display:none;">
+
     </td>
 
-    <td>
+    <td {{ 'style="opacity:0.5;pointer-events:none;"' if modo == "editar" }}>
 
         <canvas
             id="firmaCoordinador"
@@ -1028,9 +938,33 @@
         🗑
 
         </button>
+
+        <button
+            type="button"
+            id="subirFirmaCoordinador"
+            class="btn-limpiar">
+
+        🖼️
+
+        </button>
+
+        <input
+            type="file"
+            id="archivoFirmaCoordinador"
+            accept="image/*"
+            style="display:none;">
+
     </td>
 
 </tr>
+
+{% if modo == "editar" %}
+<tr>
+    <td colspan="3" style="text-align:center; font-size:0.85em; color:#b00;">
+        Las firmas ya registradas se conservan tal cual — este formulario solo corrige datos y fechas.
+    </td>
+</tr>
+{% endif %}
 
 <tr>
 
@@ -1041,7 +975,8 @@
         <input
             type="date"
             class="campo-fecha"
-            name="fecha_firma_tecnico">
+            name="fecha_firma_tecnico"
+            value="{{ orden.fecha_firma_tecnico if modo == "editar" and orden else "" }}">
 
     </td>
 
@@ -1052,7 +987,8 @@
         <input
             type="date"
             class="campo-fecha"
-            name="fecha_firma_supervisor">
+            name="fecha_firma_supervisor"
+            value="{{ orden.fecha_firma_supervisor if modo == "editar" and orden else "" }}">
 
     </td>
 
@@ -1063,33 +999,47 @@
         <input
             type="date"
             class="campo-fecha"
-            name="fecha_firma_coordinador">
+            name="fecha_firma_coordinador"
+            value="{{ orden.fecha_firma_coordinador if modo == "editar" and orden else "" }}">
 
     </td>
 
 </tr>
 
+<!--
+    firma.js SIEMPRE sobrescribe estos 3 hidden inputs en el submit
+    (firma_tecnico incluso si el canvas quedó vacío, ya que a
+    diferencia de supervisor/coordinador no chequea isEmpty()). Por
+    eso aquí ya NO importa qué valor traigan al cargar la página —
+    lo que sea que viaje en el POST se ignora de todas formas, porque
+    actualizar_orden() no incluye firma_tecnico/firma_supervisor/
+    firma_coordinador en su UPDATE. La base de datos nunca se toca
+    en estos 3 campos desde esta ruta.
+-->
 <input
     type="hidden"
     name="firma_tecnico"
-    id="firma_tecnico">
+    id="firma_tecnico"
+    value="{{ orden.firma_tecnico if modo == "editar" and orden else "" }}">
 
 <input
     type="hidden"
     name="firma_supervisor"
-    id="firma_supervisor">
+    id="firma_supervisor"
+    value="{{ orden.firma_supervisor if modo == "editar" and orden else "" }}">
 
 <input
     type="hidden"
     name="firma_coordinador"
-    id="firma_coordinador">
+    id="firma_coordinador"
+    value="{{ orden.firma_coordinador if modo == "editar" and orden else "" }}">
 </table>
 
 <div class="botones">
 
     <button type="submit" class="btn-guardar">
 
-        💾 Guardar Orden
+        {{ "💾 Guardar cambios" if modo == "editar" else "💾 Guardar Orden" }}
 
     </button>
 

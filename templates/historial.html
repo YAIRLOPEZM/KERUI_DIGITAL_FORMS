@@ -87,6 +87,14 @@
 
     <a href="/pdf-descarga/{{ orden[1] }}" target="_blank" title="Ver PDF">📄</a>
 
+    <!--
+        Va a /editar directo (sin chequear el estado aquí): la
+        contraseña de supervisor es la que protege el acceso real,
+        en verificar_supervisor(). Si alguien sin la clave hace clic,
+        simplemente se le pide la contraseña y no pasa de ahí.
+    -->
+    <a href="/orden/{{ orden[1] }}/editar" title="Editar (requiere clave de supervisor)">✏️</a>
+
     <form
         method="POST"
         action="/orden/{{ orden[1] }}/eliminar"
