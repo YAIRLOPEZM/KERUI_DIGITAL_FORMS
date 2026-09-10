@@ -649,13 +649,13 @@
 
     </tr>
 
-        {% for i in range(1, 6) %}
-        {% set r = orden.repuestos[i - 1] if modo == "editar" and orden and orden.repuestos else None %}
+        {% for i in range(1, 11) %}
+        {% set r = orden.repuestos[i - 1] if modo == "editar" and orden and orden.repuestos and orden.repuestos|length > i - 1 else None %}
         <tr>
         <td><input type="text" class="campo" name="repuesto{{ i }}_item" value="{{ r.item if r else '' }}"></td>
         <td><input type="text" class="campo" name="repuesto{{ i }}_descripcion" value="{{ r.descripcion if r else '' }}"></td>
         <td><input type="text" class="campo" name="repuesto{{ i }}_parte" value="{{ r.parte if r else '' }}"></td>
-        <td><input type="number" class="campo" name="repuesto{{ i }}_cantidad" value="{{ r.cantidad if r else '' }}"></td>
+        <td><input type="text" class="campo" name="repuesto{{ i }}_cantidad" placeholder="ej. 2 galones, 1.5 litros" value="{{ r.cantidad if r else '' }}"></td>
     </tr>
         {% endfor %}
 
