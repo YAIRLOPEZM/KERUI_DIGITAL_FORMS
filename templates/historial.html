@@ -87,6 +87,18 @@
 
     <a href="/pdf-descarga/{{ orden[1] }}" target="_blank" title="Ver PDF">📄</a>
 
+    {% if orden[6] == "PENDIENTE_SUPERVISOR" %}
+    <a href="#"
+       class="btn-link-firma"
+       data-link="{{ url_for('aprobar_supervisor', numero_ot=orden[1], _external=True) }}"
+       title="Copiar link para que firme el supervisor">🔗</a>
+    {% elif orden[6] == "PENDIENTE_COORDINADOR" %}
+    <a href="#"
+       class="btn-link-firma"
+       data-link="{{ url_for('aprobar_coordinador', numero_ot=orden[1], _external=True) }}"
+       title="Copiar link para que firme el coordinador">🔗</a>
+    {% endif %}
+
     <!--
         Va a /editar directo (sin chequear el estado aquí): la
         contraseña de supervisor es la que protege el acceso real,
@@ -112,6 +124,22 @@
 </table>
 
 </div>
+
+<script>
+document.querySelectorAll(".btn-link-firma").forEach(function (boton) {
+    boton.addEventListener("click", function (evento) {
+        evento.preventDefault();
+        var link = this.getAttribute("data-link");
+        navigator.clipboard.writeText(link).then(function () {
+            alert("Link copiado:\n" + link);
+        }).catch(function () {
+            // Si el navegador bloquea el portapapeles (poco común en
+            // https), al menos se muestra el link para copiarlo a mano.
+            prompt("Copia este link manualmente:", link);
+        });
+    });
+});
+</script>
 
 </body>
 
